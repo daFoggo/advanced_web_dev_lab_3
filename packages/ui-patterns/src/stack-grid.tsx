@@ -11,6 +11,7 @@ import {
   IconRedis,
   IconSupabase,
   IconTailwind,
+  IconTanstack,
   IconTurborepo,
   IconVercel,
   IconZod,
@@ -25,17 +26,18 @@ export interface StackItem {
 }
 
 /**
- * 15 primary technologies comprising the next-mono-base stack,
- * ordered logically in 5 cohesive architectural tiers (3 items per tier):
- * 1. Monorepo foundation: Next.js, Turborepo, pnpm
+ * 16 primary technologies comprising the next-mono-base stack,
+ * ordered logically across 5 cohesive architectural tiers:
+ * 1. Monorepo & browser runtime: Next.js, TanStack, Turborepo, pnpm
  * 2. Frontend & state: Tailwind CSS, Zustand, Zod
- * 3. Pluggable auth seam: Keycloak, Better Auth, Supabase (plus FastAPI OAuth2)
+ * 3. Tri-stack auth seam: Keycloak, Better Auth, Supabase
  * 4. Backend & database: PostgreSQL, FastAPI, Docker
  * 5. Platform, cache & AI: Vercel, Redis, Claude AI
  */
 export const STACK_ITEMS: readonly StackItem[] = [
-  // Tier 1: Foundation & Monorepo
+  // Tier 1: Foundation, Monorepo & Browser Runtime
   { name: "Next.js", category: "foundation", Icon: IconNextjs },
+  { name: "TanStack", category: "frontend", Icon: IconTanstack },
   { name: "Turborepo", category: "foundation", Icon: IconTurborepo },
   { name: "pnpm", category: "foundation", Icon: IconPnpm },
 
@@ -44,7 +46,7 @@ export const STACK_ITEMS: readonly StackItem[] = [
   { name: "Zustand", category: "frontend", Icon: IconZustand },
   { name: "Zod", category: "frontend", Icon: IconZod },
 
-  // Tier 3: Pluggable Auth Seam
+  // Tier 3: Tri-Stack Auth Seam
   { name: "Keycloak", category: "auth", Icon: IconKeycloak },
   { name: "Better Auth", category: "auth", Icon: IconBetterAuth },
   { name: "Supabase", category: "auth", Icon: IconSupabase },
@@ -68,7 +70,7 @@ export interface StackGridProps {
 
 /**
  * Clean hairline-bordered tech stack grid matching the reference bento design:
- * - 3 columns of 5 rows (15 items total)
+ * - 4 columns of 4 rows on sm+ viewports (16 items total; 2x8 on mobile)
  * - Centered icons + brand names
  * - Subtle hover highlighting
  * - Full light/dark mode support
@@ -83,8 +85,8 @@ export function StackGrid({
     <div
       className={`grid border-t border-l border-border/40 ${
         isCompact
-          ? "grid-cols-2 sm:grid-cols-3"
-          : "grid-cols-2 sm:grid-cols-3"
+          ? "grid-cols-2 sm:grid-cols-4"
+          : "grid-cols-2 sm:grid-cols-4"
       } ${className}`}
     >
       {STACK_ITEMS.map((item) => (

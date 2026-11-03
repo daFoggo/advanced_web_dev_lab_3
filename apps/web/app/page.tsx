@@ -55,8 +55,8 @@ const ARCHITECTURE_CHAPTERS = [
   {
     number: "05",
     badge: "Validation",
-    title: "Zod Schema Contracts",
-    desc: "Runtime type validation at every network boundary, form mutation, and server action. Strict TypeScript contracts from database to UI.",
+    title: "TanStack Form & Zod Schema Contracts",
+    desc: "Headless type-safe forms and runtime validation at every network boundary, form mutation, and server action. Strict TypeScript contracts from database to UI.",
     meta: "Type-safe",
   },
   {
@@ -92,10 +92,10 @@ const PILLARS = [
   },
   {
     icon: IconCpu,
-    title: "Zustand & Zod Contracts",
-    badge: "Client State",
+    title: "TanStack, Zustand & Zod",
+    badge: "Client & Forms",
     description:
-      "Zustand manages shared client-only state without React context re-render waterfalls. Zod validates all API parameters, form mutations, and server action inputs with end-to-end type safety.",
+      "TanStack headless primitives, Zustand client-only stores without React context re-render waterfalls, and Zod validation across all API parameters, form mutations, and server actions.",
   },
 ] as const
 
@@ -197,7 +197,7 @@ export default function HomePage() {
               </h2>
             </div>
             <div className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-              <CountingNumber number={15} />
+              <CountingNumber number={16} />
               <span>technologies ·</span>
               <CountingNumber number={4} />
               <span>auth providers · Zero lock-in</span>
