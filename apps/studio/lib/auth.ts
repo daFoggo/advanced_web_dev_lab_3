@@ -18,7 +18,11 @@ export type {
 } from "@workspace/auth/types"
 
 /** Active provider union for this deployment. */
-export function getActiveAuthProvider(): "better-auth" | "supabase" | "keycloak" {
+export function getActiveAuthProvider():
+  | "better-auth"
+  | "supabase"
+  | "keycloak"
+  | "fastapi-oauth" {
   return authConfig.AUTH_PROVIDER
 }
 

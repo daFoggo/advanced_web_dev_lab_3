@@ -1,6 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers"
+import { updateTag } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { SignInSchema, SignUpSchema } from "@workspace/auth/schemas"
@@ -12,6 +13,7 @@ import {
   SIGN_IN_PATH,
 } from "@/config/routes"
 import { getAuthProvider, type SignUpResult } from "@/lib/auth"
+import { SESSION_TAG } from "@/lib/dal"
 import {
   DEMO_COOKIE,
   DEMO_TTL_SECONDS,
@@ -51,6 +53,9 @@ export async function signInAction(
     return { error: getErrorMessage(error, "Could not sign in"), values }
   }
 
+  // getSession() is "use cache: private" and only reruns for a new cookie once its tag
+  // is invalidated — without this, the dashboard can keep rendering the signed-out shell.
+  updateTag(SESSION_TAG)
   // redirect() throws, so it must stay outside the try/catch.
   redirect(DASHBOARD_PATH)
 }
@@ -93,6 +98,7 @@ export async function signUpAction(
   }
 
   if (result === "confirm-email") return { confirmEmail: true }
+  updateTag(SESSION_TAG)
   redirect(DASHBOARD_PATH)
 }
 
@@ -153,11 +159,13 @@ export async function demoSignInAction(
     path: "/",
     maxAge: DEMO_TTL_SECONDS,
   })
+  updateTag(SESSION_TAG)
   redirect(DASHBOARD_PATH)
 }
 
 export async function signOutAction(): Promise<void> {
   const provider = await getAuthProvider()
   await provider.signOut()
+  updateTag(SESSION_TAG)
   redirect(SIGN_IN_PATH)
 }

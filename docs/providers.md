@@ -1,6 +1,6 @@
-# Providers: Better Auth + FastAPI, or Supabase
+# Providers: Better Auth + FastAPI, Supabase, Keycloak, or FastAPI OAuth2
 
-`apps/studio` is built to run on one of two **stacks**, chosen by a single env var. Pages, queries, actions, cache,
+`apps/studio` is built to run on one of four **stacks**, chosen by a single env var. Pages, queries, actions, cache,
 components and the DAL do not know which one is active.
 
 | `AUTH_PROVIDER` | Identity | Data and business rules | Schema lives in |
@@ -8,10 +8,11 @@ components and the DAL do not know which one is active.
 | `better-auth` | Better Auth inside Next (`/api/auth/*`), EdDSA JWT | FastAPI (`your FastAPI backend`) through `apiFetch` | `your FastAPI backend/migrations` (Alembic) |
 | `supabase` | Supabase Auth (GoTrue), ES256 JWT, cookies via `@supabase/ssr` | PostgREST + RLS + SQL functions through `createDataClient` | `packages/db/supabase/migrations` (Supabase CLI) |
 | `keycloak` | Standalone Keycloak 26 OIDC server, RS256 JWT | FastAPI or PostgREST through `Session.accessToken` (Bearer) | Realm export in `d:\Dev_Projects\keycloak-idp\realms` |
+| `fastapi-oauth` | `your FastAPI backend` is the IdP itself (OAuth2 password flow), HS256 JWT | Same FastAPI backend, same request (`Session.accessToken`) | `your FastAPI backend/migrations` (Alembic, `users` table) |
 
 **Current state.** A project built on the base can run on `supabase` (hosted project, foundation schema only; the studio
-uses it through `packages/auth` and `packages/db`). Both stacks stay in the base: switching `AUTH_PROVIDER` still works
-for a project that wants Better Auth + FastAPI. History below is the base's: the Supabase **foundation**
+uses it through `packages/auth` and `packages/db`). All stacks stay in the base: switching `AUTH_PROVIDER` still works
+for a project that wants Better Auth + FastAPI, Keycloak, or pure FastAPI OAuth2. History below is the base's: the Supabase **foundation**
 stays in the base (§1) so a new project can start on Supabase without setup work. The original Supabase data path (schema, RLS, SQL functions, pgTAP tests, the
 `server.supabase.ts` files, the calendar hook) was built, passed parity on both stacks, then removed; it is kept in
 commit `91c11f0` as a complete reference (§2.3). With today's code, `AUTH_PROVIDER=supabase` signs users in but feature
@@ -74,17 +75,27 @@ Everything is in commit `91c11f0`:
 2. `apps/studio/.env.local`: `AUTH_PROVIDER=keycloak`, `KEYCLOAK_ISSUER=http://localhost:8080/realms/studio`, `KEYCLOAK_CLIENT_ID=studio-app`, `KEYCLOAK_CLIENT_SECRET=studio-dev-client-secret-at-least-32-chars`.
 3. `pnpm --filter studio dev`.
 
+### 2.5 FastAPI OAuth2 (pure)
+No Better Auth: the backend hashes passwords (`bcrypt`), stores its own `users` table, and issues/verifies its
+own JWTs (`PyJWT`, HS256). There is no JWKS endpoint — issuer and verifier are the same service, so the frontend
+verifies the signature with a secret it must be given, not a published public key.
+1. `docker compose up -d` in `your FastAPI backend` (same backend as the `better-auth` stack).
+2. `apps/studio/.env.local`: `AUTH_PROVIDER=fastapi-oauth`, `API_BASE_URL=http://localhost:8000`,
+   `JWT_SECRET_KEY=<same value as the backend's own JWT_SECRET_KEY>`.
+3. `pnpm --filter studio dev`.
+No social login: the backend doesn't implement any, so `SocialAuthButtons` shows both buttons disabled on this stack.
+
 ## 3. The seams (the only code that knows the provider)
 
 | Seam | Files | Rule |
 | :--- | :--- | :--- |
 | Config | `packages/auth/src/config.ts` | Discriminated union on `AUTH_PROVIDER`; each stack lists only its own env vars |
-| Identity | `packages/auth/src/{better-auth,supabase}/` | Implements `AuthProvider` (`types.ts`) + proxy `updateSession`; picked in `packages/auth/src/server.ts` and `packages/auth/src/proxy.ts` |
+| Identity | `packages/auth/src/{better-auth,supabase,keycloak,fastapi-oauth}/` | Implements `AuthProvider` (`types.ts`) + proxy `updateSession`; picked in `packages/auth/src/server.ts` and `packages/auth/src/proxy.ts` |
 | Feature data | `features/<x>/server.ts` (+ `server.api.ts` / `server.supabase.ts` when both exist) | Returns the same Zod-parsed DTOs on every path; nothing else calls a backend |
 | Errors | `lib/errors.ts` | `isExpectedDataError` covers `ApiError` (4xx) and `DataError` (rule/constraint codes); a rejected token ends the session on both paths |
 | Calendar in the token | `Session.calendar`, `AuthProvider.refreshSession`, `getCalendar()` (`features/settings/queries.ts`) | Optional: without it `getCalendar()` falls back to the settings read |
-| OAuth callback | `app/auth/callback/route.ts` | Only Supabase uses it; Better Auth handles its own callback |
-| CSP | `next.config.ts` | `form-action` adds the Supabase origin only on the Supabase stack |
+| OAuth callback | `app/auth/callback/route.ts` | Only Supabase and Keycloak use it; Better Auth handles its own callback |
+| CSP | `next.config.ts` | `form-action` adds the Supabase / Keycloak origin only on those stacks |
 
 ## 4. Developing on each provider
 
@@ -156,7 +167,7 @@ Automated in `apps/studio/e2e/parity.spec.ts`: switch `AUTH_PROVIDER`, restart `
 - Another user's ids: nothing readable, nothing writable.
 - Session ended on the server → next navigation reaches sign-in without a loop.
 
-## 8. Adding a third stack, or mixing
+## 8. Adding another stack, or mixing
 
 Implement `AuthProvider` + `updateSession` in `packages/auth/src/<name>/`, the feature data per §2.2.4, extend the config union and
 `.env.example`, then run §7. If only the identity changes (e.g. Supabase Auth with FastAPI), skip the data files: point

@@ -12,7 +12,7 @@ import { Spinner } from "@workspace/ui/components/spinner"
 import { toast } from "@workspace/ui/components/toast"
 
 type SocialAuthButtonsProps = {
-  activeProvider: "better-auth" | "supabase" | "keycloak"
+  activeProvider: "better-auth" | "supabase" | "keycloak" | "fastapi-oauth"
   mode?: "sign-in" | "sign-up"
   hasDemo?: boolean
   keycloakAction: () => Promise<void>

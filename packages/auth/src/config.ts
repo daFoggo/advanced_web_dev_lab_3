@@ -30,6 +30,18 @@ const authSchema = z.discriminatedUnion("AUTH_PROVIDER", [
       .min(1)
       .default("studio-dev-client-secret-at-least-32-chars"),
   }),
+  z.object({
+    AUTH_PROVIDER: z.literal("fastapi-oauth"),
+    // Same backend as the `better-auth` stack, but it issues the tokens itself
+    // (OAuth2 password flow) instead of verifying ones minted by Better Auth.
+    API_BASE_URL: z.url().default("http://localhost:8000"),
+    // HS256 secret shared with the backend's own JWT_SECRET_KEY: this service is
+    // both issuer and verifier, so there is no JWKS endpoint to fetch a public key from.
+    JWT_SECRET_KEY: z
+      .string()
+      .min(32)
+      .default("change-me-to-a-random-64-char-secret"),
+  }),
 ])
 
 export type AuthConfig = z.infer<typeof authSchema>
@@ -52,4 +64,6 @@ export const authConfig: AuthConfig = authSchema.parse({
   KEYCLOAK_ISSUER: process.env.KEYCLOAK_ISSUER,
   KEYCLOAK_CLIENT_ID: process.env.KEYCLOAK_CLIENT_ID,
   KEYCLOAK_CLIENT_SECRET: process.env.KEYCLOAK_CLIENT_SECRET,
+  API_BASE_URL: process.env.API_BASE_URL,
+  JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
 })

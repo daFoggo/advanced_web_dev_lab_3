@@ -13,6 +13,11 @@ export async function getAuthProvider(
   if (authConfig.AUTH_PROVIDER === "keycloak") {
     return (await import("./keycloak/server")).createKeycloakProvider(options)
   }
+  if (authConfig.AUTH_PROVIDER === "fastapi-oauth") {
+    return (await import("./fastapi-oauth/server")).createFastApiOAuthProvider(
+      options
+    )
+  }
   return (await import("./better-auth/server")).createBetterAuthProvider(
     options
   )

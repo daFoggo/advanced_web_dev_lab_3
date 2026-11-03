@@ -1,7 +1,7 @@
 import "server-only"
 
 import { cache } from "react"
-import { cacheLife } from "next/cache"
+import { cacheLife, cacheTag } from "next/cache"
 import { forbidden, redirect } from "next/navigation"
 
 import { hasPermission, type Permission } from "@workspace/auth/permissions"
@@ -18,9 +18,12 @@ export type { Calendar, Session }
  * (cookies + Better Auth's `Date.now()` expiry check) can run in the per-session App Shell.
  * Never stored on the server across production requests.
  */
+export const SESSION_TAG = "session"
+
 export async function getSession(): Promise<Session | null> {
   "use cache: private"
   cacheLife({ stale: 300, revalidate: 300, expire: 3600 })
+  cacheTag(SESSION_TAG)
   const provider = await getAuthProvider()
   return provider.getSession()
 }

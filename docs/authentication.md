@@ -14,10 +14,11 @@ One provider per deployment, chosen by `AUTH_PROVIDER`; it also picks the data p
 | `better-auth` | Self-hosted auth backed by PostgreSQL `auth` schema; issues EdDSA JWTs via JWKS for FastAPI | Secure httpOnly session cookies handled by Better Auth |
 | `supabase` | Supabase Auth via `@supabase/ssr`; ES256 JWT checked locally with `getClaims()`; data through PostgREST + RLS | `sb-<ref>-auth-token` cookies, refreshed only in `proxy.ts` |
 | `keycloak` | Keycloak 26 OIDC provider backed by PostgreSQL; RS256 JWT verified locally via JWKS | Split `httpOnly` cookies (`<name>.{access,refresh,id}`), refreshed only in `proxy.ts` |
+| `fastapi-oauth` | The FastAPI backend itself is the IdP (OAuth2 password flow, `python-jose`-free: plain `PyJWT` + `bcrypt`); HS256 JWT verified locally with a secret shared between the two services | Split `httpOnly` cookies (`<name>.{access,refresh}`), refreshed only in `proxy.ts` |
 
 All implement `AuthProvider` and expose `Session { userId, accessToken, role, name, email, calendar? }`, so the DAL,
 Server Actions and data clients interact through a standard, decoupled contract. The base can run on `supabase`,
-`better-auth` or `keycloak` ([providers.md](providers.md)).
+`better-auth`, `keycloak` or `fastapi-oauth` ([providers.md](providers.md)).
 
 Principles:
 
@@ -35,11 +36,11 @@ Browser ─cookie─▶ proxy.ts ─▶ updateSession (Better Auth): decrypt/ref
                      ▼
    Server Component / Action / Route Handler ─▶ lib/dal.ts (getSession · verifySession · verifySessionFresh)
                      ▼
-        getAuthProvider() ─▶ packages/auth/src/{better-auth,supabase}/server.ts
+        getAuthProvider() ─▶ packages/auth/src/{better-auth,supabase,keycloak,fastapi-oauth}/server.ts
                      ▼
          apiFetch ─Bearer JWT─▶ FastAPI Backend (/v1/*)
                                   ▼
-                              JWKS (EdDSA) verification at backend
+                              JWKS (EdDSA) or HS256 verification at backend
 ```
 
 Paths in `apps/studio/` unless they start with `packages/`:
@@ -57,6 +58,10 @@ Paths in `apps/studio/` unless they start with `packages/`:
 - `packages/auth/src/better-auth/proxy.ts`: cookie refresh during routing.
 - `app/api/auth/[...all]/route.ts`: `createBetterAuthHandler(AUTH_OPTIONS)` (404 on the Supabase stack).
 - `lib/http.ts`: `apiFetch` sending Bearer JWT to FastAPI backend (`API_BASE_URL`).
+- `packages/auth/src/fastapi-oauth/{server,proxy}.ts`: `createFastApiOAuthProvider(options)`;
+  `client.ts` calls the backend's own `/api/v1/auth/{register,token,refresh}`, `jwt.ts` verifies
+  the HS256 signature locally with the secret shared via `JWT_SECRET_KEY` (no JWKS: this backend
+  is both issuer and verifier). No OAuth/social login — the backend doesn't implement any.
 
 ## 3. JWT & JWKS Verification in FastAPI
 

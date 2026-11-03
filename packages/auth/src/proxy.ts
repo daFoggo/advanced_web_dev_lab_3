@@ -18,6 +18,12 @@ export async function updateSession(
   if (authConfig.AUTH_PROVIDER === "keycloak") {
     return (await import("./keycloak/proxy")).updateSession(request, options)
   }
+  if (authConfig.AUTH_PROVIDER === "fastapi-oauth") {
+    return (await import("./fastapi-oauth/proxy")).updateSession(
+      request,
+      options
+    )
+  }
   return (await import("./better-auth/proxy")).updateSession(request, options)
 }
 
