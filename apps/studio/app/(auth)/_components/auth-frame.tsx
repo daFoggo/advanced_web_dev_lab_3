@@ -60,7 +60,25 @@ export function AuthMain({ children }: { children: React.ReactNode }) {
     <main className="flex min-h-svh flex-col px-9 max-sm:px-6 lg:col-span-6 xl:col-span-5">
       {children}
       <p className="py-8 text-center font-mono text-xs text-balance text-muted-foreground">
-        By continuing, you agree to the Terms of Service and Privacy Policy.
+        By continuing, you agree to the{" "}
+        <a
+          href={`${LANDING_URL}/terms`}
+          className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a
+          href={`${LANDING_URL}/privacy`}
+          className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Privacy Policy
+        </a>
+        .
       </p>
     </main>
   )
