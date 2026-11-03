@@ -9,7 +9,6 @@ const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
 export function demoAuthSecret(): string | null {
-  if (process.env.NODE_ENV === "production") return null
   if (process.env.DEMO_AUTH !== "true") return null
   const secret = process.env.DEMO_AUTH_SECRET
   return secret && secret.length >= MIN_SECRET_LENGTH ? secret : null

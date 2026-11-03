@@ -135,7 +135,7 @@ export function SocialAuthButtons({
         )}
 
         {/* Demo Sign-in Button */}
-        {hasDemo && demoAction && mode === "sign-in" ? (
+        {hasDemo && demoAction ? (
           <form action={demoFormAction} className="flex-1">
             <Button
               type="submit"

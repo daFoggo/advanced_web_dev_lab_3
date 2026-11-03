@@ -101,9 +101,11 @@ describe("demo session", () => {
     expect(await readDemoSession(token)).toBeNull()
   })
 
-  it("returns null in production even if DEMO_AUTH is true", () => {
+  it("works in production when DEMO_AUTH is explicitly true with a valid secret", () => {
     vi.stubEnv("NODE_ENV", "production")
-    expect(demoAuthSecret()).toBeNull()
+    vi.stubEnv("DEMO_AUTH", "true")
+    vi.stubEnv("DEMO_AUTH_SECRET", SECRET)
+    expect(demoAuthSecret()).toBe(SECRET)
   })
 
   it("never throws on garbage input", async () => {
