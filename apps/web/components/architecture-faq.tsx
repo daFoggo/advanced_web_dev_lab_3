@@ -38,6 +38,12 @@ const FAQS = [
     answer:
       "The repository contains strict AGENTS.md rules, exhaustive docs/ architecture guides, and Antigravity/Claude AI skill definitions. AI agents automatically read these rules to generate code that adheres to monorepo boundaries, zero-shadow design system tokens, and strict type safety without hallucination.",
   },
+  {
+    id: "security-audit",
+    question: "How is security verified and audited in this architecture?",
+    answer:
+      "The codebase is audited using a formal security audit skill with deterministic 10-unit coverage ledgers and parallel hunter agents. Defenses include token-bound tenant isolation, fail-fast production secret validation, least-privilege DAL permissions, PostgreSQL search_path pinning, live DB role checks in RPCs, and strict ESLint client/server boundaries.",
+  },
 ]
 
 export function ArchitectureFaq() {
