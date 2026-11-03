@@ -26,7 +26,7 @@ export function HeroSection() {
         </h1>
         <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground sm:text-xl font-normal">
           A modular Next.js 16.4 monorepo starter engineered with intentional architecture.
-          Choose your preferred auth provider (Keycloak, Better Auth, Supabase, or FastAPI OAuth2),
+          Choose your preferred auth provider (Neon Auth, Supabase, Keycloak, or FastAPI OAuth2),
           build with strict data access boundaries, and pair program with Claude AI under deterministic skill rules.
         </p>
       </div>

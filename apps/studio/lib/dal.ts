@@ -15,7 +15,7 @@ export type { Calendar, Session }
 /**
  * Data Access Layer entry point. `"use cache: private"` (not React `cache`, which each cache scope
  * isolates) so every query's private scope joins one session read per request, and the read
- * (cookies + Better Auth's `Date.now()` expiry check) can run in the per-session App Shell.
+ * (cookies + the SDK's `Date.now()` expiry check) can run in the per-session App Shell.
  * Never stored on the server across production requests.
  */
 export const SESSION_TAG = "session"

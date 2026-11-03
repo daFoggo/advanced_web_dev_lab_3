@@ -10,7 +10,7 @@ import {
   signInWithGoogleAction,
   signUpWithKeycloakAction,
 } from "@/features/auth/actions"
-import { getActiveAuthProvider } from "@/lib/auth"
+import { getActiveAuthProvider, isGoogleEnabled } from "@/lib/auth"
 import { demoAuthSecret } from "@/lib/demo-session"
 
 import {
@@ -34,7 +34,8 @@ export default function SignUpPage() {
     <>
       <AuthAside>
         <AuthPitch title="Start from a solid Next.js base.">
-          A modular monorepo starter with pluggable auth, clean data layers, and Claude AI conventions.
+          A modular monorepo starter with pluggable auth, clean data layers, and
+          Claude AI conventions.
         </AuthPitch>
         <StackShowcase />
       </AuthAside>
@@ -54,6 +55,7 @@ export default function SignUpPage() {
               activeProvider={activeProvider}
               mode="sign-up"
               hasDemo={hasDemo}
+              googleEnabled={isGoogleEnabled()}
               keycloakAction={signUpWithKeycloakAction}
               googleAction={signInWithGoogleAction}
               demoAction={demoSignInAction}

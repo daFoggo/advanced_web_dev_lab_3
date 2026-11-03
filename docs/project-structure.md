@@ -54,7 +54,7 @@ next-mono-base/
 │       └── eslint.config.js                # Boundary enforcement rules
 ├── packages/
 │   ├── ui/                                 # Primitive shadcn/ui components (@workspace/ui)
-│   ├── auth/                               # Auth providers (Better Auth, Supabase), roles, proxy refresh (@workspace/auth)
+│   ├── auth/                               # Auth providers (Neon Auth, Supabase, Keycloak, FastAPI), roles, proxy refresh (@workspace/auth)
 │   ├── ui-patterns/                        # Composed UI both apps share: ThemeProvider, ThemeToggle, AppLogo (@workspace/ui-patterns)
 │   ├── db/                                 # Supabase clients, errors, formatters, types + supabase/ CLI dir (@workspace/db)
 │   ├── eslint-config/                      # Shared ESLint flat configurations

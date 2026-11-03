@@ -17,7 +17,7 @@ const PACKAGES = [
   {
     path: "packages/auth",
     type: "package",
-    role: "Unified auth seam for Keycloak, Better Auth, and Supabase",
+    role: "Unified auth seam for Neon Auth, Supabase, Keycloak, and FastAPI",
     tag: "@workspace/auth",
   },
   {

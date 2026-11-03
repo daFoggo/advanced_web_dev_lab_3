@@ -18,7 +18,5 @@ export async function getAuthProvider(
       options
     )
   }
-  return (await import("./better-auth/server")).createBetterAuthProvider(
-    options
-  )
+  return (await import("./neon-auth/server")).createNeonAuthProvider()
 }

@@ -22,7 +22,7 @@ export const PILLARS: readonly ArchitecturalPillar[] = [
     title: "Multi-Stack Auth Seam",
     badge: "Pluggable",
     description:
-      "Enterprise Keycloak 26 with PKCE S256 & RS256 JWKS verification, Better Auth with direct DB pooling, Supabase Auth, or pure FastAPI OAuth2 JWTs. Switch providers via an environment variable with zero application code changes.",
+      "Enterprise Keycloak 26 with PKCE S256 & RS256 JWKS verification, Neon Auth with Neon Postgres, Supabase Auth, or pure FastAPI OAuth2 JWTs. Switch providers via an environment variable with zero application code changes.",
   },
   {
     icon: IconDatabase,

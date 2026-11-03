@@ -10,19 +10,17 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@neon/auth": "^0.8.2",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "@workspace/db": "workspace:*",
-    "better-auth": "1.7.11",
     "jose": "^6.2.13",
     "next": "16.4.2",
-    "pg": "8.23.1",
     "server-only": "^0.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/pg": "8.23.1",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^10",
@@ -36,6 +34,6 @@
     "./server": "./src/server.ts",
     "./proxy": "./src/proxy.ts",
     "./schemas": "./src/schemas.ts",
-    "./better-auth-handler": "./src/better-auth/handler.ts"
+    "./auth-handler": "./src/neon-auth/handler.ts"
   }
 }
