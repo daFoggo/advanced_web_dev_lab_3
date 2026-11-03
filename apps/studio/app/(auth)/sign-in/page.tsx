@@ -12,7 +12,7 @@ import {
   signInWithGoogleAction,
   signInWithKeycloakAction,
 } from "@/features/auth/actions"
-import { getActiveAuthProvider } from "@/lib/auth"
+import { getActiveAuthProvider, isGoogleEnabled } from "@/lib/auth"
 import { demoAuthSecret } from "@/lib/demo-session"
 
 import {
@@ -52,7 +52,8 @@ export default function SignInPage({
     <>
       <AuthAside>
         <AuthPitch title="Pick up where you left off.">
-          Next.js 16 monorepo starter with pluggable auth (Keycloak, Better Auth, or Supabase).
+          Next.js 16 monorepo starter with pluggable auth (Neon Auth, Supabase,
+          Keycloak, or FastAPI).
         </AuthPitch>
         <StackShowcase />
       </AuthAside>
@@ -75,6 +76,7 @@ export default function SignInPage({
               activeProvider={activeProvider}
               mode="sign-in"
               hasDemo={hasDemo}
+              googleEnabled={isGoogleEnabled()}
               keycloakAction={signInWithKeycloakAction}
               googleAction={signInWithGoogleAction}
               demoAction={demoSignInAction}

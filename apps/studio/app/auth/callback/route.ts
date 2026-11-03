@@ -13,6 +13,24 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code")
   const state = searchParams.get("state")
 
+  // Neon Auth finishes in `proxy.ts` (it swaps the verifier for cookies before this route runs): a session
+  // here means the flow succeeded, with no `code` to exchange.
+  if (!code) {
+    const session = await (await getAuthProvider()).getSession()
+    if (session) return NextResponse.redirect(new URL(DASHBOARD_PATH, origin))
+    // Why the flow ended without a session: the provider's own error, and which cookies this request carried
+    // (names only, never values).
+    console.warn("[auth/callback] no session after OAuth", {
+      query: Object.fromEntries(
+        [...searchParams].filter(
+          ([key]) => key !== "neon_auth_session_verifier"
+        )
+      ),
+      hadVerifier: searchParams.has("neon_auth_session_verifier"),
+      cookies: request.cookies.getAll().map((cookie) => cookie.name),
+    })
+  }
+
   if (code) {
     try {
       const provider = await getAuthProvider()

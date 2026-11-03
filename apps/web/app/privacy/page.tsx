@@ -122,7 +122,7 @@ export default function PrivacyPolicyPage() {
               <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
                 <span className="font-medium text-xs text-foreground uppercase tracking-wider font-mono">Performance of Contract</span>
                 <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Provisioning user accounts, authenticating sessions across Keycloak/Supabase/Better Auth, and managing workspace resources.
+                  Provisioning user accounts, authenticating sessions across Neon Auth/Supabase/Keycloak, and managing workspace resources.
                 </p>
               </div>
               <div className="rounded-lg border border-border/50 bg-muted/10 p-4">

@@ -19,11 +19,16 @@ export type {
 
 /** Active provider union for this deployment. */
 export function getActiveAuthProvider():
-  | "better-auth"
-  | "supabase"
-  | "keycloak"
-  | "fastapi-oauth" {
+  "neon-auth" | "supabase" | "keycloak" | "fastapi-oauth" {
   return authConfig.AUTH_PROVIDER
+}
+
+/**
+ * Google sign-in is offered when the stack can do it: Neon Auth (the provider is switched on in the Neon console;
+ * a click on an unconfigured one lands on `?error=oauth`).
+ */
+export function isGoogleEnabled(): boolean {
+  return authConfig.AUTH_PROVIDER === "neon-auth"
 }
 
 /** True when the active deployment runs on the Keycloak IDP stack. */

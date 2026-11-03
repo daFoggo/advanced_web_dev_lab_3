@@ -6,24 +6,14 @@ describe("parseAuthConfig", () => {
   it("uses default dev placeholders in development/test", () => {
     const config = parseAuthConfig({
       NODE_ENV: "test",
-      AUTH_PROVIDER: "better-auth",
+      AUTH_PROVIDER: "neon-auth",
     })
-    expect(config.AUTH_PROVIDER).toBe("better-auth")
-    if (config.AUTH_PROVIDER === "better-auth") {
-      expect(config.BETTER_AUTH_SECRET).toBe(
+    expect(config.AUTH_PROVIDER).toBe("neon-auth")
+    if (config.AUTH_PROVIDER === "neon-auth") {
+      expect(config.NEON_AUTH_COOKIE_SECRET).toBe(
         "placeholder-secret-at-least-32-characters-long"
       )
     }
-  })
-
-  it("fails in production if BETTER_AUTH_SECRET is omitted", () => {
-    expect(() =>
-      parseAuthConfig({
-        NODE_ENV: "production",
-        AUTH_PROVIDER: "better-auth",
-        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/db",
-      })
-    ).toThrow()
   })
 
   it("fails in production if KEYCLOAK_CLIENT_SECRET is omitted", () => {
@@ -62,11 +52,11 @@ describe("parseAuthConfig", () => {
     const config = parseAuthConfig({
       NODE_ENV: "production",
       NEXT_PHASE: "phase-production-build",
-      AUTH_PROVIDER: "better-auth",
+      AUTH_PROVIDER: "neon-auth",
     })
-    expect(config.AUTH_PROVIDER).toBe("better-auth")
-    if (config.AUTH_PROVIDER === "better-auth") {
-      expect(config.BETTER_AUTH_SECRET).toBe(
+    expect(config.AUTH_PROVIDER).toBe("neon-auth")
+    if (config.AUTH_PROVIDER === "neon-auth") {
+      expect(config.NEON_AUTH_COOKIE_SECRET).toBe(
         "placeholder-secret-at-least-32-characters-long"
       )
     }
@@ -79,5 +69,57 @@ describe("parseAuthConfig", () => {
       AUTH_PROVIDER: "supabase",
     })
     expect(config.AUTH_PROVIDER).toBe("supabase")
+  })
+  describe("neon-auth", () => {
+    it("parses with the Neon URL and a dev cookie secret placeholder", () => {
+      const config = parseAuthConfig({
+        NODE_ENV: "test",
+        AUTH_PROVIDER: "neon-auth",
+        NEON_AUTH_BASE_URL: "https://ep-x.neonauth.test/neondb/auth",
+      })
+      expect(config.AUTH_PROVIDER).toBe("neon-auth")
+      if (config.AUTH_PROVIDER === "neon-auth") {
+        expect(config.NEON_AUTH_BASE_URL).toContain("neonauth")
+        expect(config.NEON_AUTH_COOKIE_SECRET.length).toBeGreaterThanOrEqual(32)
+      }
+    })
+
+    it("fails in production without the cookie secret or URL", () => {
+      expect(() =>
+        parseAuthConfig({
+          NODE_ENV: "production",
+          AUTH_PROVIDER: "neon-auth",
+          NEON_AUTH_BASE_URL: "https://ep-x.neonauth.test/neondb/auth",
+        })
+      ).toThrow()
+      expect(() =>
+        parseAuthConfig({
+          NODE_ENV: "production",
+          AUTH_PROVIDER: "neon-auth",
+          NEON_AUTH_COOKIE_SECRET: "x".repeat(32),
+        })
+      ).toThrow()
+    })
+
+    it("lets next build run without live secrets", () => {
+      expect(() =>
+        parseAuthConfig({
+          NODE_ENV: "production",
+          NEXT_PHASE: "phase-production-build",
+          AUTH_PROVIDER: "neon-auth",
+        })
+      ).not.toThrow()
+    })
+
+    it("rejects a short cookie secret in production", () => {
+      expect(() =>
+        parseAuthConfig({
+          NODE_ENV: "production",
+          AUTH_PROVIDER: "neon-auth",
+          NEON_AUTH_BASE_URL: "https://ep-x.neonauth.test/neondb/auth",
+          NEON_AUTH_COOKIE_SECRET: "short",
+        })
+      ).toThrow()
+    })
   })
 })

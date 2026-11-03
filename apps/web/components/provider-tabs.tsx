@@ -5,7 +5,7 @@ import { IconTerminal2 } from "@tabler/icons-react"
 import { motion } from "motion/react"
 import { CopyButton } from "@workspace/ui/components/animate-ui/buttons/copy"
 
-type ProviderKey = "keycloak" | "better-auth" | "supabase" | "fastapi-oauth"
+type ProviderKey = "keycloak" | "neon-auth" | "supabase" | "fastapi-oauth"
 
 interface ProviderInfo {
   name: string
@@ -28,16 +28,18 @@ KEYCLOAK_CLIENT_SECRET="studio-dev-client-secret"`,
       "Single sign-on & standalone Docker stack",
     ],
   },
-  "better-auth": {
-    name: "Better Auth",
-    badge: "TypeScript Native",
-    envSnippet: `AUTH_PROVIDER="better-auth"
-BETTER_AUTH_SECRET="your-32-character-random-secret"
-BETTER_AUTH_URL="http://localhost:3001"`,
+  "neon-auth": {
+    name: "Neon Auth",
+    badge: "Managed + Postgres",
+    envSnippet: `AUTH_PROVIDER="neon-auth"
+DATA_PROVIDER="neon"
+NEON_AUTH_BASE_URL="https://ep-xxx.neonauth.../neondb/auth"
+NEON_AUTH_COOKIE_SECRET="your-32-character-random-secret"
+DATABASE_URL="postgresql://..."`,
     features: [
-      "Lightweight TypeScript authentication framework",
-      "Direct PostgreSQL connection via @workspace/db",
-      "Session management with cookie fallback",
+      "Managed Better Auth hosted by Neon, nothing to run",
+      "Neon Postgres with Drizzle for feature data",
+      "Google sign-in switched on in the Neon console",
     ],
   },
   supabase: {

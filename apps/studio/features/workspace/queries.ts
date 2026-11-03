@@ -18,11 +18,11 @@ export async function getWorkspace() {
   "use cache: private"
   cacheLife({ stale: 300, revalidate: 300, expire: 3600 })
   // Authorizes next to the data (layouts never do): every route that reads the workspace passes here.
-  const { userId, accessToken } = await requirePermission("account:view")
+  const { userId } = await requirePermission("account:view")
   cacheTag(workspaceTag(userId))
   const [orgs, projects] = await Promise.all([
-    fetchOrgs(accessToken),
-    fetchProjects(accessToken),
+    fetchOrgs(userId),
+    fetchProjects(userId),
   ])
   return { orgs, projects }
 }

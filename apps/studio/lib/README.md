@@ -12,6 +12,6 @@ App infrastructure, not tied to one feature. Server-only modules start with `imp
 - `dal.ts`: Data Access Layer: `getSession` (`"use cache: private"`, one read per request), `verifySession`,
   `refreshSessionClaims` (after a write that changes a token claim). Call next to the data.
 - `auth.ts`: `getAuthProvider()`, the `@workspace/auth` provider bound to this app's cookie (`config/auth.ts`).
-  **One provider per deployment** via `AUTH_PROVIDER=better-auth|supabase` (docs/providers.md). The adapters
-  (`better-auth/`, `supabase/`), the auth env (`@workspace/auth/config`) and the proxy refresh
+  **One provider per deployment** via `AUTH_PROVIDER=neon-auth|supabase|keycloak|fastapi-oauth` (docs/providers.md). The adapters
+  (`neon-auth/`, `supabase/`, `keycloak/`, `fastapi-oauth/`), the auth env (`@workspace/auth/config`) and the proxy refresh
   (`@workspace/auth/proxy`, the **only** place that refreshes tokens) live in `packages/auth`.

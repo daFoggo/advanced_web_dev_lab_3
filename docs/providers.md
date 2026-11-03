@@ -1,18 +1,41 @@
-# Providers: Better Auth + FastAPI, Supabase, Keycloak, or FastAPI OAuth2
+# Providers: Neon, Supabase, Keycloak, or FastAPI OAuth2
 
 `apps/studio` is built to run on one of four **stacks**, chosen by a single env var. Pages, queries, actions, cache,
 components and the DAL do not know which one is active.
 
 | `AUTH_PROVIDER` | Identity | Data and business rules | Schema lives in |
 | :--- | :--- | :--- | :--- |
-| `better-auth` | Better Auth inside Next (`/api/auth/*`), EdDSA JWT | FastAPI (`your FastAPI backend`) through `apiFetch` | `your FastAPI backend/migrations` (Alembic) |
+| `neon-auth` | Neon Auth (managed Better Auth), proxied at `/api/auth/*` | Neon Postgres via Drizzle (`DATA_PROVIDER=neon`) | `packages/db/neon/migrations` (drizzle-kit) |
 | `supabase` | Supabase Auth (GoTrue), ES256 JWT, cookies via `@supabase/ssr` | PostgREST + RLS + SQL functions through `createDataClient` | `packages/db/supabase/migrations` (Supabase CLI) |
 | `keycloak` | Standalone Keycloak 26 OIDC server, RS256 JWT | FastAPI or PostgREST through `Session.accessToken` (Bearer) | Realm export in `d:\Dev_Projects\keycloak-idp\realms` |
 | `fastapi-oauth` | `your FastAPI backend` is the IdP itself (OAuth2 password flow), HS256 JWT | Same FastAPI backend, same request (`Session.accessToken`) | `your FastAPI backend/migrations` (Alembic, `users` table) |
 
+## 0. Two axes: identity and data
+
+`AUTH_PROVIDER` picks who signs users in. `DATA_PROVIDER` (`mock` | `neon`, default `mock`) picks where feature data
+lives; `lib/env.ts` rejects `DATA_PROVIDER=neon` with an `AUTH_PROVIDER` other than `neon-auth` (each data path pairs with its own identity), or
+without `DATABASE_URL`. Feature `server.ts` files select the implementation (`server.mock.ts` / `server.neon.ts`,
+the latter type-checked against the former). Today only `features/workspace` has a Neon path.
+
+Neon (Postgres) with Drizzle, in `packages/db`:
+- `@workspace/db/neon` (`getDb()`, `node-postgres` pool over the pooled `DATABASE_URL`) and `@workspace/db/neon/schema`
+  (app tables `orgs` / `projects` in `public`; Neon Auth keeps its users in the `neon_auth` schema of the same branch).
+- Migrations: `packages/db/neon/migrations`, applied with `pnpm --filter @workspace/db neon:migrate` over the direct
+  `DATABASE_URL_UNPOOLED` (reads `apps/studio/.env.local`; fill it with `pnpm neon:env`). Change the schema in `schema.ts`, then
+  `pnpm --filter @workspace/db neon:generate`. Never edit an applied migration.
+- Tenant boundary: every query filters by the signed-in `userId` (`ownerId`); another user's org looks missing.
+- Provisioning: `neon.ts` (services), `.neon` (project link, git-ignored), `.mcp.json` (Neon MCP, OAuth), skills `neon`
+  and `neon-postgres`.
+- `AUTH_PROVIDER=neon-auth`: Neon Auth (managed Better Auth, `@neon/auth`). `packages/auth/src/neon-auth/` implements
+  `AuthProvider`; `/api/auth/[...path]` proxies to Neon's server; the signed session cookie is kept by the SDK. Env:
+  `NEON_AUTH_BASE_URL` (from `neon deploy`) and your own `NEON_AUTH_COOKIE_SECRET`. The proxy check is optimistic (cookie
+  presence); the DAL validates. `role` comes from Neon's user `role` (`user` maps to `customer`). Users live in the
+  `neon_auth` schema of the same branch, so `ownerId` in `orgs` is that user id. Not wired: Google (needs provider setup
+  in the Neon console), email verification, organizations.
+
 **Current state.** A project built on the base can run on `supabase` (hosted project, foundation schema only; the studio
 uses it through `packages/auth` and `packages/db`). All stacks stay in the base: switching `AUTH_PROVIDER` still works
-for a project that wants Better Auth + FastAPI, Keycloak, or pure FastAPI OAuth2. History below is the base's: the Supabase **foundation**
+for a project that wants Keycloak, Supabase, or pure FastAPI OAuth2. History below is the base's: the Supabase **foundation**
 stays in the base (§1) so a new project can start on Supabase without setup work. The original Supabase data path (schema, RLS, SQL functions, pgTAP tests, the
 `server.supabase.ts` files, the calendar hook) was built, passed parity on both stacks, then removed; it is kept in
 commit `91c11f0` as a complete reference (§2.3). With today's code, `AUTH_PROVIDER=supabase` signs users in but feature
@@ -29,7 +52,7 @@ Paths relative to `apps/studio/`.
 | :--- | :--- | :--- |
 | Config | `packages/auth/src/config.ts`, `.env.example`, `turbo.json` env | `AUTH_PROVIDER` union; the `supabase` branch needs only URL + publishable key |
 | Identity | `packages/auth/src/supabase/{server,proxy}.ts`, `packages/auth/src/server.ts`, `packages/auth/src/proxy.ts` | `getClaims()` (local JWT check), `getUser()` for fresh checks, token refresh only in the proxy, `scope: "local"` sign-out, OAuth start |
-| OAuth callback | `app/auth/callback/route.ts` | `exchangeCodeForSession`; Better Auth's `/api/auth/*` answers 404 on this stack |
+| OAuth callback | `app/auth/callback/route.ts` | `exchangeCodeForSession`; `/api/auth/*` (Neon Auth proxy) answers 404 on this stack |
 | Data client | `@workspace/db/server`, `packages/db/src/database.types.ts` (placeholder) | `createDataClient(accessToken)`: requests run as the user so RLS applies; `unwrap` throws `DataError`. A rejected token (`PGRST301` / `PGRST303`) is not handled inside the package: the app's feature `server.ts` maps it to `endRejectedSession()` (`lib/http.ts`) |
 | Errors | `lib/errors.ts` | `DataError` + `isExpectedDataError` cover both paths; actions return rule errors as values |
 | Calendar seam | `Session.calendar`, `AuthProvider.refreshSession`, `getCalendar()`, `refreshSessionClaims()` | A provider that puts timezone / week start / adoption date in the token saves a settings read per page (§5) |
@@ -39,9 +62,9 @@ Paths relative to `apps/studio/`.
 
 ## 2. Running each stack
 
-### 2.1 Better Auth + FastAPI
-1. `apps/studio/.env.local`: the `better-auth` block of `.env.example`.
-2. `docker compose up -d` in `your FastAPI backend` (Postgres on host port 5433, API on 8000).
+### 2.1 Neon (Neon Auth + Neon Postgres)
+1. `pnpm neon:env` (root) pulls the Neon variables into `apps/studio/.env.local`; add `NEON_AUTH_COOKIE_SECRET` (32+ chars) and `DATA_PROVIDER=neon`.
+2. `pnpm --filter @workspace/db neon:migrate`.
 3. `pnpm --filter studio dev`.
 
 ### 2.2 A new project on Supabase (from this base)
@@ -76,10 +99,10 @@ Everything is in commit `91c11f0`:
 3. `pnpm --filter studio dev`.
 
 ### 2.5 FastAPI OAuth2 (pure)
-No Better Auth: the backend hashes passwords (`bcrypt`), stores its own `users` table, and issues/verifies its
+The backend hashes passwords (`bcrypt`), stores its own `users` table, and issues/verifies its
 own JWTs (`PyJWT`, HS256). There is no JWKS endpoint — issuer and verifier are the same service, so the frontend
 verifies the signature with a secret it must be given, not a published public key.
-1. `docker compose up -d` in `your FastAPI backend` (same backend as the `better-auth` stack).
+1. `docker compose up -d` in `your FastAPI backend` (your FastAPI backend).
 2. `apps/studio/.env.local`: `AUTH_PROVIDER=fastapi-oauth`, `API_BASE_URL=http://localhost:8000`,
    `JWT_SECRET_KEY=<same value as the backend's own JWT_SECRET_KEY>`.
 3. `pnpm --filter studio dev`.
@@ -90,11 +113,11 @@ No social login: the backend doesn't implement any, so `SocialAuthButtons` shows
 | Seam | Files | Rule |
 | :--- | :--- | :--- |
 | Config | `packages/auth/src/config.ts` | Discriminated union on `AUTH_PROVIDER`; each stack lists only its own env vars |
-| Identity | `packages/auth/src/{better-auth,supabase,keycloak,fastapi-oauth}/` | Implements `AuthProvider` (`types.ts`) + proxy `updateSession`; picked in `packages/auth/src/server.ts` and `packages/auth/src/proxy.ts` |
+| Identity | `packages/auth/src/{neon-auth,supabase,keycloak,fastapi-oauth}/` | Implements `AuthProvider` (`types.ts`) + proxy `updateSession`; picked in `packages/auth/src/server.ts` and `packages/auth/src/proxy.ts` |
 | Feature data | `features/<x>/server.ts` (+ `server.api.ts` / `server.supabase.ts` when both exist) | Returns the same Zod-parsed DTOs on every path; nothing else calls a backend |
 | Errors | `lib/errors.ts` | `isExpectedDataError` covers `ApiError` (4xx) and `DataError` (rule/constraint codes); a rejected token ends the session on both paths |
 | Calendar in the token | `Session.calendar`, `AuthProvider.refreshSession`, `getCalendar()` (`features/settings/queries.ts`) | Optional: without it `getCalendar()` falls back to the settings read |
-| OAuth callback | `app/auth/callback/route.ts` | Only Supabase and Keycloak use it; Better Auth handles its own callback |
+| OAuth callback | `app/auth/callback/route.ts` | Supabase and Keycloak exchange a code here; Neon Auth finishes in `proxy.ts` (session verifier) |
 | CSP | `next.config.ts` | `form-action` adds the Supabase / Keycloak origin only on those stacks |
 
 ## 4. Developing on each provider
@@ -142,7 +165,7 @@ Rules:
 
 ## 6. Behaviour that differs (documented, not hidden)
 
-| | `better-auth` | `supabase` |
+| | FastAPI backend | `supabase` |
 | :--- | :--- | :--- |
 | "Today" | Python (`core/clock.py`, D11) | SQL `private.today_for()` using `user_settings.timezone` |
 | Timezone names | Python `zoneinfo` | Postgres `pg_timezone_names`; checked in `validate_timezone` (TM-2) |

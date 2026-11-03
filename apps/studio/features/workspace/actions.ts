@@ -31,7 +31,7 @@ export async function createOrgAction(
 
   let slug: string
   try {
-    slug = (await insertOrg(session.accessToken, parsed.data)).slug
+    slug = (await insertOrg(session.userId, parsed.data)).slug
   } catch (error) {
     if (isExpectedDataError(error)) return { error: error.message, values }
     throw error
@@ -58,7 +58,7 @@ export async function createProjectAction(
 
   let ref: string
   try {
-    ref = (await insertProject(session.accessToken, orgSlug, parsed.data)).ref
+    ref = (await insertProject(session.userId, orgSlug, parsed.data)).ref
   } catch (error) {
     if (isExpectedDataError(error)) return { error: error.message, values }
     throw error

@@ -11,14 +11,14 @@ One provider per deployment, chosen by `AUTH_PROVIDER`; it also picks the data p
 
 | Provider | Description | Session lives in |
 |---|---|---|
-| `better-auth` | Self-hosted auth backed by PostgreSQL `auth` schema; issues EdDSA JWTs via JWKS for FastAPI | Secure httpOnly session cookies handled by Better Auth |
+| `neon-auth` | Neon Auth (managed Better Auth hosted by Neon); the app proxies `/api/auth/*` and verifies sessions through the SDK | Signed session cookie kept by `@neon/auth` (`__Secure-neon-auth.*`) |
 | `supabase` | Supabase Auth via `@supabase/ssr`; ES256 JWT checked locally with `getClaims()`; data through PostgREST + RLS | `sb-<ref>-auth-token` cookies, refreshed only in `proxy.ts` |
 | `keycloak` | Keycloak 26 OIDC provider backed by PostgreSQL; RS256 JWT verified locally via JWKS | Split `httpOnly` cookies (`<name>.{access,refresh,id}`), refreshed only in `proxy.ts` |
 | `fastapi-oauth` | The FastAPI backend itself is the IdP (OAuth2 password flow, `python-jose`-free: plain `PyJWT` + `bcrypt`); HS256 JWT verified locally with a secret shared between the two services | Split `httpOnly` cookies (`<name>.{access,refresh}`), refreshed only in `proxy.ts` |
 
 All implement `AuthProvider` and expose `Session { userId, accessToken, role, name, email, calendar? }`, so the DAL,
 Server Actions and data clients interact through a standard, decoupled contract. The base can run on `supabase`,
-`better-auth`, `keycloak` or `fastapi-oauth` ([providers.md](providers.md)).
+`neon-auth`, `keycloak` or `fastapi-oauth` ([providers.md](providers.md)).
 
 Principles:
 
@@ -32,43 +32,38 @@ Principles:
 ## 2. Architecture
 
 ```
-Browser ─cookie─▶ proxy.ts ─▶ updateSession (Better Auth): decrypt/refresh, set cookies, isAuthenticated
+Browser ─cookie─▶ proxy.ts ─▶ updateSession (provider): optimistic cookie check / refresh, isAuthenticated
                      ▼
    Server Component / Action / Route Handler ─▶ lib/dal.ts (getSession · verifySession · verifySessionFresh)
                      ▼
-        getAuthProvider() ─▶ packages/auth/src/{better-auth,supabase,keycloak,fastapi-oauth}/server.ts
+        getAuthProvider() ─▶ packages/auth/src/{neon-auth,supabase,keycloak,fastapi-oauth}/server.ts
                      ▼
          apiFetch ─Bearer JWT─▶ FastAPI Backend (/v1/*)
                                   ▼
-                              JWKS (EdDSA) or HS256 verification at backend
+                              JWKS (RS256/ES256) or HS256 verification at backend
 ```
 
 Paths in `apps/studio/` unless they start with `packages/`:
 - `proxy.ts`: calls `updateSession(request, AUTH_OPTIONS)` from `@workspace/auth/proxy`, which refreshes the active
   provider's session; `redirectWithSession` keeps the refreshed cookies on redirects.
 - `config/auth.ts`: `AUTH_OPTIONS` (this app's cookie name); `lib/auth.ts`: `getAuthProvider()` bound to it.
-- `packages/auth/src/better-auth/auth.ts`: Better Auth instance with Postgres pool (`search_path=auth`), JWT plugin with EdDSA JWKS, `nextCookies()`.
-- `packages/auth/src/better-auth/server.ts`: `createBetterAuthProvider(options)` implementing `AuthProvider`.
+- `packages/auth/src/neon-auth/{auth,server,proxy,handler}.ts`: `createNeonAuth` singleton, `createNeonAuthProvider()` implementing `AuthProvider`, the optimistic cookie check (and the Google verifier exchange) for `proxy.ts`, and the `/api/auth/*` proxy.
 - `packages/auth/src/supabase/{server,proxy}.ts`: `createSupabaseProvider(options)`; `getClaims()` verifies identity, `getUser()` backs
   `verifySessionFresh`, `getSession()` only forwards the already verified token. `app/auth/callback/route.ts` finishes OAuth.
   When a Custom Access Token Hook adds `timezone`, `week_start`, `adopted_on` claims they become `Session.calendar`
   ([providers.md](providers.md) §5); `refreshSession()` reissues the token after settings change (`refreshSessionClaims()`
   in the DAL).
 - `@workspace/db/server`: `createDataClient(accessToken)` for feature data on the Supabase stack (RLS applies).
-- `packages/auth/src/better-auth/proxy.ts`: cookie refresh during routing.
-- `app/api/auth/[...all]/route.ts`: `createBetterAuthHandler(AUTH_OPTIONS)` (404 on the Supabase stack).
+- `app/api/auth/[...path]/route.ts`: `createAuthHandler()` (Neon Auth proxy; 404 on the other stacks).
 - `lib/http.ts`: `apiFetch` sending Bearer JWT to FastAPI backend (`API_BASE_URL`).
 - `packages/auth/src/fastapi-oauth/{server,proxy}.ts`: `createFastApiOAuthProvider(options)`;
   `client.ts` calls the backend's own `/api/v1/auth/{register,token,refresh}`, `jwt.ts` verifies
   the HS256 signature locally with the secret shared via `JWT_SECRET_KEY` (no JWKS: this backend
   is both issuer and verifier). No OAuth/social login — the backend doesn't implement any.
 
-## 3. JWT & JWKS Verification in FastAPI
+## 3. Verifying tokens in FastAPI
 
-FastAPI (`your FastAPI backend`) verifies JWTs using PyJWKClient / PyJWT:
-1. `GET /api/auth/jwks` serves the public Ed25519 keys published by Better Auth.
-2. FastAPI caches keys and validates `sub`, `aud` (`API_AUDIENCE`), `iss` (`BETTER_AUTH_URL`), and `exp`.
-3. Injected `CurrentUser(id, email, role)` dependency is available across all protected endpoints.
+Only the `keycloak` and `fastapi-oauth` stacks send a Bearer token to FastAPI. Keycloak publishes a JWKS (RS256) the backend caches and checks for `sub`, `aud`, `iss` and `exp`; `fastapi-oauth` signs and verifies its own HS256 tokens.
 
 ## Shared packages, per-app cookies and roles
 
@@ -85,7 +80,7 @@ in the app that owns the login; they become a package only when a second app nee
 | `@workspace/auth/config` | `authConfig`: the `AUTH_PROVIDER` union and each stack's env (not `server-only`; the proxy reads it) |
 | `@workspace/auth/server` | `getAuthProvider(options)`: the active provider for one app (`server-only`) |
 | `@workspace/auth/proxy` | `updateSession(request, options)`, `redirectWithSession(url, session)` |
-| `@workspace/auth/better-auth-handler` | `createBetterAuthHandler(options)` for `app/api/auth/[...all]` |
+| `@workspace/auth/auth-handler` | `createAuthHandler()` for `app/api/auth/[...path]` |
 | `@workspace/auth/permissions` | `Role`, `hasPermission`, `parseRole`, `isStaff` |
 | `@workspace/auth/types`, `/schemas` | `Session`, `AuthProvider`, `AuthOptions`; `SignInSchema`, `SignUpSchema` |
 | `@workspace/db/{public,server,errors,format,types}` | Supabase clients (`createPublicClient` for `"use cache"`, `createDataClient(token)` for RLS as the user), `unwrap`, `DataError`, `formatVnd`, `slugify`, generated `Database` |

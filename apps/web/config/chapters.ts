@@ -18,7 +18,7 @@ export const ARCHITECTURE_CHAPTERS: readonly ArchitectureChapter[] = [
     number: "02",
     badge: "Auth Seam",
     title: "Multi-Stack Authentication Seam",
-    desc: "Native support for Keycloak 26 OIDC, Better Auth, Supabase, or pure FastAPI OAuth2 behind one @workspace/auth seam. Switch via AUTH_PROVIDER without touching application code.",
+    desc: "Native support for Neon Auth, Supabase, Keycloak 26 OIDC, or pure FastAPI OAuth2 behind one @workspace/auth seam. Switch via AUTH_PROVIDER without touching application code.",
     meta: "Zero lock-in",
   },
   {

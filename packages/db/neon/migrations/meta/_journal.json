@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793687833176,
+      "tag": "0000_neon_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793687846422,
+      "tag": "0001_auth_search_path",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793688071549,
+      "tag": "0002_jwks_alg_crv",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793689456323,
+      "tag": "0003_drop_better_auth_schema",
+      "breakpoints": true
+    }
+  ]
+}

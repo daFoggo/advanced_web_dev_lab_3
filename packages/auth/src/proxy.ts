@@ -24,7 +24,7 @@ export async function updateSession(
       options
     )
   }
-  return (await import("./better-auth/proxy")).updateSession(request, options)
+  return (await import("./neon-auth/proxy")).updateSession(request)
 }
 
 const CACHE_HEADERS = ["cache-control", "expires", "pragma"]

@@ -12,9 +12,11 @@ import { Spinner } from "@workspace/ui/components/spinner"
 import { toast } from "@workspace/ui/components/toast"
 
 type SocialAuthButtonsProps = {
-  activeProvider: "better-auth" | "supabase" | "keycloak" | "fastapi-oauth"
+  activeProvider:
+    "neon-auth" | "supabase" | "keycloak" | "fastapi-oauth"
   mode?: "sign-in" | "sign-up"
   hasDemo?: boolean
+  googleEnabled?: boolean
   keycloakAction: () => Promise<void>
   googleAction?: () => Promise<void>
   demoAction?: (
@@ -27,12 +29,13 @@ export function SocialAuthButtons({
   activeProvider,
   mode = "sign-in",
   hasDemo = false,
+  googleEnabled = false,
   keycloakAction,
   googleAction,
   demoAction,
 }: SocialAuthButtonsProps) {
   const isKeycloakActive = activeProvider === "keycloak"
-  const isGoogleActive = false // Google OAuth is disabled by default in template
+  const isGoogleActive = googleEnabled
 
   const [_demoState, demoFormAction, demoPending] = useActionState(
     demoAction ?? (async () => ({})),
@@ -88,7 +91,7 @@ export function SocialAuthButtons({
                   : "Continue with Keycloak SSO"
               }
             >
-              <IconShieldLock className="size-4 text-primary shrink-0" />
+              <IconShieldLock className="size-4 shrink-0 text-primary" />
               <span className="truncate">Keycloak</span>
             </Button>
           </form>
@@ -97,11 +100,11 @@ export function SocialAuthButtons({
             type="button"
             variant="outline"
             size="default"
-            className="flex-1 gap-2 text-xs sm:text-sm opacity-75 hover:opacity-100"
+            className="flex-1 gap-2 text-xs opacity-75 hover:opacity-100 sm:text-sm"
             onClick={handleKeycloakClick}
             title="Continue with Keycloak SSO"
           >
-            <IconShieldLock className="size-4 text-muted-foreground shrink-0" />
+            <IconShieldLock className="size-4 shrink-0 text-muted-foreground" />
             <span className="truncate">Keycloak</span>
           </Button>
         )}
@@ -125,11 +128,11 @@ export function SocialAuthButtons({
             type="button"
             variant="outline"
             size="default"
-            className="flex-1 gap-2 text-xs sm:text-sm opacity-75 hover:opacity-100"
+            className="flex-1 gap-2 text-xs opacity-75 hover:opacity-100 sm:text-sm"
             onClick={handleGoogleClick}
             title="Continue with Google"
           >
-            <IconBrandGoogle className="size-4 text-muted-foreground shrink-0" />
+            <IconBrandGoogle className="size-4 shrink-0 text-muted-foreground" />
             <span className="truncate">Google</span>
           </Button>
         )}

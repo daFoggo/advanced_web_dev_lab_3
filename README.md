@@ -1,6 +1,6 @@
 # next-mono-base
 
-Next.js 16.4 + Turborepo + pnpm monorepo base with shadcn/ui (`base-nova` + Animate UI) and pluggable authentication (`keycloak` | `better-auth` | `supabase` | `fastapi-oauth`).
+Next.js 16.4 + Turborepo + pnpm monorepo base with shadcn/ui (`base-nova` + Animate UI) and pluggable authentication (`neon-auth` | `supabase` | `keycloak` | `fastapi-oauth`).
 
 ## Structure
 
@@ -10,7 +10,7 @@ apps/
   studio/                 Next.js dashboard: sign-in, organizations, projects (runnable)
 packages/
   ui/                     @workspace/ui — shared shadcn/ui components, styles
-  auth/                   @workspace/auth — Keycloak / Better Auth / Supabase / FastAPI OAuth2 providers behind AUTH_PROVIDER
+  auth/                   @workspace/auth — Neon Auth / Supabase / Keycloak / FastAPI OAuth2 providers behind AUTH_PROVIDER
   ui-patterns/            @workspace/ui-patterns — pieces both apps share: ThemeProvider, ThemeToggle, AppLogo, StackGrid
   db/                     @workspace/db — Supabase & PostgreSQL clients, types, migrations
   eslint-config/          @workspace/eslint-config

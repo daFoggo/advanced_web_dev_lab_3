@@ -58,3 +58,4 @@ next-env.d.ts
 apps/admin/e2e/.auth/
 
 .vercel
+.neon

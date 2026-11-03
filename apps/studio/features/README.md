@@ -8,7 +8,7 @@ features/<name>/
   components/   UI shared across pages or around the feature
   server.ts     "server-only": the only backend calls (FastAPI via lib/http, or PostgREST via @workspace/db/server).
                 A repo that keeps both stacks splits it (docs/providers.md §2.2):
-    server.api.ts       FastAPI via lib/http (AUTH_PROVIDER=better-auth)
+    server.api.ts       FastAPI via lib/http (AUTH_PROVIDER=keycloak|fastapi-oauth)
     server.supabase.ts  PostgREST + RLS via @workspace/db/server (AUTH_PROVIDER=supabase)
   queries.ts    reads for Server Components (auth via lib/dal, "use cache" here)
   actions.ts    "use server": mutations (validate with Zod, verify session first)

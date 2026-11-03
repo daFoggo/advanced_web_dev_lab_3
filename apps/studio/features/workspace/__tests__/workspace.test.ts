@@ -5,7 +5,7 @@ vi.mock("server-only", () => ({}))
 import { ApiError } from "@/lib/errors"
 
 import { CreateProjectSchema, slugify } from "../schemas"
-import { fetchOrgs, fetchProjects, insertOrg, insertProject } from "../server"
+import { fetchOrgs, fetchProjects, insertOrg, insertProject } from "../server.mock"
 
 describe("slugify", () => {
   it("lowercases, strips accents and joins with dashes", () => {

@@ -28,8 +28,8 @@ The docs in `docs/` are the single source of truth for `apps/studio` (the dashbo
 | Data fetching, caching, mutations, Server Actions | `docs/data-fetching.md` |
 | Routes, layouts, parallel and intercepting routes | `docs/routing-and-layouts.md` |
 | Client-only shared state (Zustand) | `docs/client-state.md` |
-| Auth, sessions, DAL, roles, per-app cookies, `packages/auth` + `packages/db` (`AUTH_PROVIDER=better-auth\|supabase`; env template `apps/studio/.env.example`) | `docs/authentication.md` |
-| Stacks: Supabase (this project) or Better Auth + FastAPI (kept in the base), starting a project on Supabase, provider seams, per-provider rules, latency | `docs/providers.md` |
+| Auth, sessions, DAL, roles, per-app cookies, `packages/auth` + `packages/db` (`AUTH_PROVIDER=neon-auth\|supabase\|keycloak\|fastapi-oauth`, `DATA_PROVIDER=mock\|neon`; env template `apps/studio/.env.example`) | `docs/authentication.md` |
+| Stacks: Neon Auth + Neon Postgres (default), Supabase, Keycloak or FastAPI OAuth2, starting a project on Neon or Supabase, provider seams, per-provider rules, latency | `docs/providers.md` |
 | Performance, code splitting, lazy loading, Core Web Vitals | `docs/performance-optimization.md` |
 | Redis cache, large uploads, SSE, telemetry, instant-navigation tests | `docs/advanced-patterns.md` |
 | UI: theme tokens, typography, spacing, responsive, shadcn component sizes, patterns, page templates, motion, admin shell | `docs/design-system.md` (visual: `docs/design-system/base-design-system.html`) |

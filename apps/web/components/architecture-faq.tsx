@@ -10,9 +10,9 @@ import {
 const FAQS = [
   {
     id: "pluggable-auth",
-    question: "How do I switch between Keycloak, Better Auth, Supabase, and FastAPI OAuth2?",
+    question: "How do I switch between Neon Auth, Supabase, Keycloak, and FastAPI OAuth2?",
     answer:
-      "All four providers are normalized behind the unified AuthProvider interface in @workspace/auth. Set AUTH_PROVIDER in apps/studio/.env.local (keycloak, better-auth, supabase, or fastapi-oauth). Server actions, proxy session refreshes, and getSession() calls remain 100% identical without changing any application code.",
+      "All four providers are normalized behind the unified AuthProvider interface in @workspace/auth. Set AUTH_PROVIDER in apps/studio/.env.local (neon-auth, supabase, keycloak, or fastapi-oauth). Server actions, proxy session refreshes, and getSession() calls remain 100% identical without changing any application code.",
   },
   {
     id: "cache-components",
@@ -30,7 +30,7 @@ const FAQS = [
     id: "pruning-providers",
     question: "Can I use only one provider and prune the others if I don't need them?",
     answer:
-      "Yes. Each provider is completely isolated in packages/auth/src/{keycloak,better-auth,supabase,fastapi-oauth}/. If your team only uses Keycloak, Supabase, or FastAPI OAuth2, the other submodules remain inactive unless configured in your environment.",
+      "Yes. Each provider is completely isolated in packages/auth/src/{neon-auth,supabase,keycloak,fastapi-oauth}/. If your team only uses Keycloak, Supabase, or FastAPI OAuth2, the other submodules remain inactive unless configured in your environment.",
   },
   {
     id: "ai-workflows",
