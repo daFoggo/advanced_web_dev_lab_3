@@ -34,8 +34,12 @@ export function getAuthSchema(isProd = process.env.NODE_ENV === "production") {
     }),
     z.object({
       AUTH_PROVIDER: z.literal("supabase"),
-      NEXT_PUBLIC_SUPABASE_URL: z.url(),
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+      NEXT_PUBLIC_SUPABASE_URL: isProd
+        ? z.url()
+        : z.url().default("http://127.0.0.1:54321"),
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: isProd
+        ? z.string().min(1)
+        : z.string().min(1).default("sb_publishable_placeholder"),
     }),
     z.object({
       AUTH_PROVIDER: z.literal("keycloak"),
@@ -78,7 +82,11 @@ export type AuthConfig = z.infer<ReturnType<typeof getAuthSchema>>
 export function parseAuthConfig(
   env: Record<string, string | undefined> = process.env
 ): AuthConfig {
-  const isProd = env.NODE_ENV === "production"
+  const isBuildPhase =
+    env.NEXT_PHASE === "phase-production-build" ||
+    env.SKIP_ENV_VALIDATION === "true" ||
+    env.SKIP_ENV_VALIDATION === "1"
+  const isProd = env.NODE_ENV === "production" && !isBuildPhase
   const schema = getAuthSchema(isProd)
   return schema.parse({
     AUTH_PROVIDER: env.AUTH_PROVIDER || "better-auth",
@@ -94,9 +102,12 @@ export function parseAuthConfig(
     API_AUDIENCE: env.API_AUDIENCE,
     GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET,
-    NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_URL:
+      env.NEXT_PUBLIC_SUPABASE_URL ||
+      (!isProd ? "http://127.0.0.1:54321" : undefined),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
-      env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      (!isProd ? "sb_publishable_placeholder" : undefined),
     KEYCLOAK_ISSUER: env.KEYCLOAK_ISSUER,
     KEYCLOAK_CLIENT_ID: env.KEYCLOAK_CLIENT_ID,
     KEYCLOAK_CLIENT_SECRET:

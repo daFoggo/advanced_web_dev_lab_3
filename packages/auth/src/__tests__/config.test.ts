@@ -57,4 +57,27 @@ describe("parseAuthConfig", () => {
       )
     }
   })
+
+  it("permits build phase without live secrets when NEXT_PHASE is phase-production-build", () => {
+    const config = parseAuthConfig({
+      NODE_ENV: "production",
+      NEXT_PHASE: "phase-production-build",
+      AUTH_PROVIDER: "better-auth",
+    })
+    expect(config.AUTH_PROVIDER).toBe("better-auth")
+    if (config.AUTH_PROVIDER === "better-auth") {
+      expect(config.BETTER_AUTH_SECRET).toBe(
+        "placeholder-secret-at-least-32-characters-long"
+      )
+    }
+  })
+
+  it("permits build phase when SKIP_ENV_VALIDATION is true", () => {
+    const config = parseAuthConfig({
+      NODE_ENV: "production",
+      SKIP_ENV_VALIDATION: "true",
+      AUTH_PROVIDER: "supabase",
+    })
+    expect(config.AUTH_PROVIDER).toBe("supabase")
+  })
 })
