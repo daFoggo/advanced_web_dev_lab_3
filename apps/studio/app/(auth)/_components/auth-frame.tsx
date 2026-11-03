@@ -130,15 +130,17 @@ export function AuthHeading({
   title,
   children,
 }: {
-  eyebrow: string
+  eyebrow?: string
   title: string
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <span className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
-        {eyebrow}
-      </span>
+    <div className="flex flex-col gap-2">
+      {eyebrow ? (
+        <span className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
+          {eyebrow}
+        </span>
+      ) : null}
       <h1 className="text-3xl leading-tight font-medium md:text-4xl">
         {title}
       </h1>

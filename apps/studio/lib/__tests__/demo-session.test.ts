@@ -101,6 +101,11 @@ describe("demo session", () => {
     expect(await readDemoSession(token)).toBeNull()
   })
 
+  it("returns null in production even if DEMO_AUTH is true", () => {
+    vi.stubEnv("NODE_ENV", "production")
+    expect(demoAuthSecret()).toBeNull()
+  })
+
   it("never throws on garbage input", async () => {
     const garbage = [
       undefined,

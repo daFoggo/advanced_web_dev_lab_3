@@ -42,7 +42,7 @@ export default function SignUpPage() {
           </AuthSwitch>
         </AuthHeader>
         <AuthBody>
-          <AuthHeading eyebrow="Sign up" title="Create an account">
+          <AuthHeading title="Create an account">
             Create an account to get started.
           </AuthHeading>
           <div className="flex flex-col gap-4">
