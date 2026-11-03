@@ -4,13 +4,13 @@ import { cache } from "react"
 import { cacheLife, cacheTag } from "next/cache"
 import { forbidden, redirect } from "next/navigation"
 
-import { hasPermission, type Permission } from "@workspace/auth/permissions"
+import { can, roleOf, type Action } from "@workspace/auth/permissions"
 
 import { SESSION_EXPIRED_PATH } from "@/config/routes"
 
-import { getAuthProvider, type Calendar, type Session } from "./auth"
+import { getAuthProvider, type Session } from "./auth"
 
-export type { Calendar, Session }
+export type { Session }
 
 /**
  * Data Access Layer entry point. `"use cache: private"` (not React `cache`, which each cache scope
@@ -36,20 +36,18 @@ export const verifySession = cache(async (): Promise<Session> => {
 })
 
 /**
- * Session that holds `permission`, else the nearest forbidden.tsx (403).
- * Call in the page or action that needs it, not in a layout.
+ * Session whose role can do `action` (`can(roleOf(session), action)`), else the nearest
+ * forbidden.tsx (403). Call in the page or action that needs it, not in a layout.
  */
-export const requirePermission = cache(
-  async (permission: Permission): Promise<Session> => {
-    const session = await verifySession()
-    if (!hasPermission(session.role, permission)) forbidden()
-    return session
-  }
-)
+export const requireCan = cache(async (action: Action): Promise<Session> => {
+  const session = await verifySession()
+  if (!can(roleOf(session), action)) forbidden()
+  return session
+})
 
 /**
- * For sensitive actions (change password, delete account, payments): also confirms with
- * the identity system that the session was not revoked. Costs a network round trip.
+ * For sensitive actions (create/delete): also confirms with the identity system that the session
+ * was not revoked. Costs a network round trip.
  */
 export const verifySessionFresh = cache(async (): Promise<Session> => {
   const provider = await getAuthProvider()
@@ -57,12 +55,3 @@ export const verifySessionFresh = cache(async (): Promise<Session> => {
   if (!session) redirect(SESSION_EXPIRED_PATH)
   return session
 })
-
-/**
- * After a Server Action changes data the provider copies into the token (`Session.calendar`):
- * reissues the token so the next request reads the new values. No-op for providers without it.
- */
-export async function refreshSessionClaims(): Promise<void> {
-  const provider = await getAuthProvider()
-  await provider.refreshSession?.()
-}

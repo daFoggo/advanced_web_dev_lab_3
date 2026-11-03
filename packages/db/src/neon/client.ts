@@ -32,7 +32,7 @@ export function getDb(): NeonDb {
   if (!globalForDb.__neonDb) {
     const connectionString = process.env.DATABASE_URL
     if (!connectionString) {
-      throw new Error("DATABASE_URL is required when DATA_PROVIDER=neon")
+      throw new Error("DATABASE_URL is required")
     }
     globalForDb.__neonDb = drizzle(
       new pg.Pool({

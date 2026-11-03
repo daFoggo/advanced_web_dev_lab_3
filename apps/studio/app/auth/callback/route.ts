@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-import { DASHBOARD_PATH, SIGN_IN_PATH } from "@/config/routes"
+import { DASHBOARD_PATH, LOGIN_PATH } from "@/config/routes"
 import { getAuthProvider } from "@/lib/auth"
 import { publicEnv } from "@/lib/env.public"
 
@@ -42,5 +42,5 @@ export async function GET(request: NextRequest) {
       // fall through to the error redirect
     }
   }
-  return NextResponse.redirect(new URL(`${SIGN_IN_PATH}?error=oauth`, origin))
+  return NextResponse.redirect(new URL(`${LOGIN_PATH}?error=oauth`, origin))
 }

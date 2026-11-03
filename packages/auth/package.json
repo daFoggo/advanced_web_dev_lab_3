@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@neon/auth": "^0.8.2",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.118.0",
     "@workspace/db": "workspace:*",
     "jose": "^6.2.13",
     "next": "16.4.2",
@@ -34,6 +32,7 @@
     "./server": "./src/server.ts",
     "./proxy": "./src/proxy.ts",
     "./schemas": "./src/schemas.ts",
-    "./auth-handler": "./src/neon-auth/handler.ts"
+    "./auth-handler": "./src/neon-auth/handler.ts",
+    "./client": "./src/neon-auth/client.ts"
   }
 }

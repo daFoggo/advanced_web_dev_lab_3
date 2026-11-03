@@ -22,23 +22,13 @@
       ],
       "env": [
         "AUTH_PROVIDER",
-        "DATA_PROVIDER",
-        "API_BASE_URL",
         "DATABASE_URL",
         "DATABASE_URL_UNPOOLED",
         "NEON_AUTH_BASE_URL",
         "NEON_AUTH_COOKIE_SECRET",
         "NEON_AUTH_LOG_LEVEL",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NODE_ENV",
-        "EXPOSE_TESTING_API",
-        "DEMO_AUTH",
-        "DEMO_AUTH_SECRET",
-        "KEYCLOAK_ISSUER",
-        "KEYCLOAK_CLIENT_ID",
-        "KEYCLOAK_CLIENT_SECRET",
-        "JWT_SECRET_KEY"
+        "EXPOSE_TESTING_API"
       ]
     },
     "lint": {
@@ -72,10 +62,7 @@
       ]
     },
     "test:e2e": {
-      "cache": false,
-      "env": [
-        "E2E_NEON"
-      ]
+      "cache": false
     }
   }
 }

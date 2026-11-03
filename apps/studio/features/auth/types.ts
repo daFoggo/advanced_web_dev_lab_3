@@ -6,9 +6,3 @@ export type FormAction<State> = (
 
 /** `values` echoes non-secret fields back: React resets the form after an action finishes. */
 export type SignInState = { error?: string; values?: { email: string } }
-export type SignUpState = {
-  error?: string
-  confirmEmail?: boolean
-  values?: { name: string; email: string }
-}
-export type DemoSignInState = { error?: string }

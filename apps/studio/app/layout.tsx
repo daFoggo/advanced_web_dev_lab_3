@@ -12,11 +12,11 @@ export const metadata: Metadata = {
   // Makes relative canonicals (`/some/path`) absolute.
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_APP_URL),
   title: {
-    default: "Next Mono Base",
-    template: "%s | Next Mono Base",
+    default: "Class Deadline Hub",
+    template: "%s | Class Deadline Hub",
   },
   description:
-    "A Next.js monorepo base: auth, data, UI kit and conventions ready to build on.",
+    "Theo dõi deadline môn học của lớp: xem hạn nộp, đánh dấu đã xong và quản lý deadline.",
 }
 
 const fontSans = Geist({
@@ -47,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="vi"
       suppressHydrationWarning
       className={cn(
         "antialiased",

@@ -1,5 +1,7 @@
 # Providers: Neon, Supabase, Keycloak, or FastAPI OAuth2
 
+> **Class Deadline Hub:** only `neon-auth` + Neon Postgres (Drizzle) remain. The Supabase, Keycloak and FastAPI OAuth2 stacks, `DATA_PROVIDER` (`mock`) and demo login were removed; the passages below that describe them are historical and no longer apply.
+
 `apps/studio` is built to run on one of four **stacks**, chosen by a single env var. Pages, queries, actions, cache,
 components and the DAL do not know which one is active.
 

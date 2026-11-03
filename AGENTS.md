@@ -20,7 +20,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Read the doc before changing the area
 
-The docs in `docs/` are the single source of truth for `apps/studio` (the dashboard; `apps/web` is only the landing page). Open the matching one first:
+The docs in `docs/` are the single source of truth for `apps/studio`. Open the matching one first:
 
 | Working on | Read |
 | :--- | :--- |

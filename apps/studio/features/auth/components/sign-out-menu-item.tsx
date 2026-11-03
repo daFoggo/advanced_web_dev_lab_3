@@ -9,11 +9,11 @@ export function SignOutMenuItem({ action }: { action: () => Promise<void> }) {
   return (
     <DropdownMenuItem
       disabled={pending}
-      // Keep the menu open while the action runs; it redirects to sign-in when done.
+      // Keep the menu open while the action runs; it redirects to login when done.
       closeOnClick={false}
       onClick={() => startTransition(() => action())}
     >
-      {pending ? "Signing out…" : "Sign out"}
+      {pending ? "Đang đăng xuất…" : "Đăng xuất"}
     </DropdownMenuItem>
   )
 }

@@ -15,41 +15,34 @@ function watch(page: Page) {
 }
 
 test.describe("Smoke", () => {
-  test("home sends a signed-out visitor to sign-in", async ({ page }) => {
+  test("home renders in Vietnamese", async ({ page }) => {
     const { errors, fonts } = watch(page)
-    await page.goto("/")
-    await page.waitForURL("**/sign-in**")
-    await expect(page.locator("html")).toHaveAttribute("lang", "en")
+    const response = await page.goto("/")
+    expect(response?.status()).toBe(200)
+    await expect(page.locator("html")).toHaveAttribute("lang", "vi")
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
     expect(fonts).toEqual([])
     expect(errors).toEqual([])
   })
 
-  test("sign-in renders the form", async ({ page }) => {
+  test("login renders the form", async ({ page }) => {
     const { errors } = watch(page)
-    const response = await page.goto("/sign-in")
+    const response = await page.goto("/login")
     expect(response?.status()).toBe(200)
-    await expect(page).toHaveTitle(/Sign in/)
+    await expect(page).toHaveTitle(/Đăng nhập/)
     await expect(page.getByLabel("Email")).toBeVisible()
     await expect(page.locator('input[type="password"]')).toBeVisible()
-    await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible()
+    await expect(page.getByRole("button", { name: "Đăng nhập" })).toBeVisible()
     expect(errors).toEqual([])
   })
 
-  test("sign-up renders the form", async ({ page }) => {
-    const { errors } = watch(page)
-    const response = await page.goto("/sign-up")
-    expect(response?.status()).toBe(200)
-    await expect(page).toHaveTitle(/Sign up/)
-    await expect(page.getByLabel("Full name")).toBeVisible()
-    await expect(
-      page.getByRole("button", { name: "Create account" })
-    ).toBeVisible()
-    expect(errors).toEqual([])
-  })
-
-  test("account redirects to sign-in without a session", async ({ page }) => {
+  test("dashboard redirects to login without a session", async ({ page }) => {
     await page.goto("/dashboard")
-    await page.waitForURL("**/sign-in**")
-    expect(new URL(page.url()).pathname).toBe("/sign-in")
+    await page.waitForURL("**/login**")
+    expect(new URL(page.url()).pathname).toBe("/login")
+  })
+
+  test("unknown deadline id is a real 404", async ({ request }) => {
+    expect((await request.get("/deadlines/abc")).status()).toBe(404)
   })
 })

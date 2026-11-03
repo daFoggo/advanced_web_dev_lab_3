@@ -12,18 +12,10 @@ const layerRestrictions = [
   },
 ]
 
-const featureRestrictions = [
-  ...layerRestrictions,
-  {
-    group: ["**/server.api", "**/server.supabase"],
-    message:
-      "Import ./server: it picks the data path of the active stack (docs/providers.md).",
-  },
-]
+const featureRestrictions = layerRestrictions
 
 const authRestrictedGroup = [
   "@/lib/auth",
-  "@/lib/env",
   "@workspace/auth/server",
   "@workspace/auth/config",
 ]
@@ -59,12 +51,11 @@ export default [
                 "**/server.*",
                 "**/queries",
                 "@/lib/dal",
-                "@/lib/http",
-                "@workspace/db/server",
+                "@workspace/db/neon",
                 ...authRestrictedGroup,
               ],
               message:
-                "Feature components must not import server-only modules (server, queries, dal, http, auth).",
+                "Feature components must not import server-only modules (server, queries, dal, db, auth).",
             },
           ],
         },
@@ -82,12 +73,11 @@ export default [
             {
               group: [
                 "@/lib/dal",
-                "@/lib/http",
-                "@workspace/db/server",
+                "@workspace/db/neon",
                 ...authRestrictedGroup,
               ],
               message:
-                "Shared components must not import server-only modules (dal, http, auth).",
+                "Shared components must not import server-only modules (dal, db, auth).",
             },
           ],
         },

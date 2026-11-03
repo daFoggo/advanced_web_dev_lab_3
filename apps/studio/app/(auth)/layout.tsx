@@ -1,4 +1,4 @@
-/** 12-column frame for the sign-in / sign-up pages; each page composes its rail and form column. */
+/** 12-column frame for the login page; each page composes its rail and form column. */
 export default function AuthLayout({
   children,
 }: {

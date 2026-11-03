@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-import { SIGN_IN_PATH } from "@/config/routes"
+import { LOGIN_PATH } from "@/config/routes"
 import { getAuthProvider } from "@/lib/auth"
 import { publicEnv } from "@/lib/env.public"
 
@@ -12,7 +12,7 @@ import { publicEnv } from "@/lib/env.public"
  */
 export async function GET(request: NextRequest) {
   const secFetchSite = request.headers.get("sec-fetch-site")
-  const targetUrl = new URL(SIGN_IN_PATH, publicEnv.NEXT_PUBLIC_APP_URL)
+  const targetUrl = new URL(LOGIN_PATH, publicEnv.NEXT_PUBLIC_APP_URL)
 
   // Prevent cross-site logout / login CSRF denial of service
   if (secFetchSite === "cross-site") {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   try {
     await (await getAuthProvider()).signOut()
   } catch {
-    // Even if provider sign-out fails we still send the user to sign-in.
+    // Even if provider sign-out fails we still send the user to login.
   }
   return NextResponse.redirect(targetUrl)
 }

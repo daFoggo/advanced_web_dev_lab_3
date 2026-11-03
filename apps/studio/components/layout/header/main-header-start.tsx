@@ -14,7 +14,7 @@ export function MainHeaderStart({ children }: { children: React.ReactNode }) {
     <div className="flex min-w-0 items-center gap-3">
       <SidebarTrigger className="-ml-1.5" />
       <Link href={DASHBOARD_PATH} className="shrink-0 md:hidden">
-        <AppLogo />
+        <AppLogo variant="mark" />
       </Link>
       <span
         aria-hidden

@@ -1,30 +1,17 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-import { authConfig } from "./config"
-import type { AuthOptions, ProxyAuthResult } from "./types"
+import type { ProxyAuthResult, ProxyOptions } from "./types"
 
 /**
- * Entry used by each app's `proxy.ts`: refreshes the session of the active provider (`AUTH_PROVIDER`).
+ * Entry used by each app's `proxy.ts`: reads the Neon Auth session.
  * Not `server-only`: the proxy runs outside the RSC graph.
  */
 export async function updateSession(
   request: NextRequest,
-  options: AuthOptions
+  options?: ProxyOptions
 ): Promise<ProxyAuthResult> {
-  if (authConfig.AUTH_PROVIDER === "supabase") {
-    return (await import("./supabase/proxy")).updateSession(request, options)
-  }
-  if (authConfig.AUTH_PROVIDER === "keycloak") {
-    return (await import("./keycloak/proxy")).updateSession(request, options)
-  }
-  if (authConfig.AUTH_PROVIDER === "fastapi-oauth") {
-    return (await import("./fastapi-oauth/proxy")).updateSession(
-      request,
-      options
-    )
-  }
-  return (await import("./neon-auth/proxy")).updateSession(request)
+  return (await import("./neon-auth/proxy")).updateSession(request, options)
 }
 
 const CACHE_HEADERS = ["cache-control", "expires", "pragma"]

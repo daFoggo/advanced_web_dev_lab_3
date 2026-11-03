@@ -1,5 +1,7 @@
 # Routing, Layouts & Route Segments
 
+> **Class Deadline Hub:** the route groups are now `(public)`, `(app)` (dashboard at `app/(app)/dashboard/`, admin at `app/(app)/admin/`) and `(auth)/login`. `app/(dashboard)`, `org/` and `project/` examples below are from the removed demo and only illustrate the patterns.
+
 How `apps/studio` organizes routes, handles multi-panel layouts, modals, and segment boundaries.
 Written against **Next.js 16.4.2** with React 19, `cacheComponents: true`, and `partialPrefetching: true`.
 Sources are the docs shipped with the package (`apps/studio/node_modules/next/dist/docs/01-app/`, written `DOCS/` below).

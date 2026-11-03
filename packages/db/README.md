@@ -1,20 +1,15 @@
 # @workspace/db
 
-Supabase clients, errors, generated types and the `supabase/` CLI directory shared by `apps/web` and `apps/admin`.
+Neon Postgres access (Drizzle ORM + `pg`) for `apps/studio`: schema, migrations and the seed.
 
 | Script (`pnpm --filter @workspace/db …`) | What it does |
 | :--- | :--- |
-| `exec supabase migration new <name>` | New migration in `supabase/migrations` (never hand-name the file) |
-| `db:test -- --dry` | Runs every pgTAP file with all migrations prepended, inside one transaction that rolls back: try unpushed migrations without touching the database |
-| `db:push` | Applies new migrations to the linked project |
-| `db:test` | Runs the pgTAP files against the linked project (each rolls back) |
-| `db:types` | Regenerates `src/database.types.ts`; run after every pushed migration |
-| `exec supabase db advisors --linked` | Security and performance lints |
+| `neon:generate` | Generates a migration from `src/neon/schema.ts` into `neon/migrations` (interactive when a table is both added and dropped) |
+| `neon:migrate` | Applies migrations through `DATABASE_URL_UNPOOLED` (env from `apps/studio/.env.local`) |
+| `neon:seed` | Idempotent seed: 4 subjects, deadlines with fixed ids 1..12 (due dates relative to now) and the accounts `admin@ptit.edu.vn` (admin) and `sv@ptit.edu.vn` (user) |
+| `neon:seed -- --reset` | Same, plus deletes deadlines with id > 12 and every completion |
 
-`supabase test db --linked` needs Docker for `pg_prove`; `scripts/test-db.mjs` runs the same files through
-`supabase db query` instead. Each test file is `begin; … rollback;`, collects TAP lines in a temp table `tap_out`
-and ends by selecting them as one `tap` column, because the Management API returns only the last result set.
-
-The foundation migration (`supabase/migrations/20261026000001_foundation.sql`) holds what `@workspace/auth` needs:
-role helpers read from `app_metadata`, `profiles` with RLS, and the admin-only `set_staff_role` / `list_accounts`
-RPCs. Add your own tables in new migrations. `signing_keys.json` is local-only and git-ignored.
+Tables (`public`): `subjects`, `deadlines`, `completions`. Users live in Neon Auth (`neon_auth.user`), so
+`completions.user_id` is that user's id as text, with no cross-schema foreign key.
+Admin role is set through the Neon API (`PUT …/auth/users/{id}/role`) using `NEON_API_KEY` and `NEON_PROJECT_ID`.
+Exports: `@workspace/db/neon` (`getDb()`) and `@workspace/db/neon/schema`.

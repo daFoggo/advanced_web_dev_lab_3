@@ -4,17 +4,17 @@ import { useEffect } from "react"
 
 export default function GlobalError({
   error,
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string }
-  reset: () => void
+  retry: () => void
 }) {
   useEffect(() => {
     console.error(error)
   }, [error])
 
   return (
-    <html lang="en">
+    <html lang="vi">
       <body
         style={{
           fontFamily:
@@ -33,7 +33,7 @@ export default function GlobalError({
         }}
       >
         <h1 style={{ fontSize: "1.25rem", fontWeight: 600, margin: 0 }}>
-          Something went wrong
+          Đã xảy ra lỗi
         </h1>
         <p
           style={{
@@ -43,11 +43,11 @@ export default function GlobalError({
             maxWidth: "24rem",
           }}
         >
-          A critical error occurred. Please reload the page or try again.
+          Đã xảy ra lỗi nghiêm trọng. Vui lòng tải lại trang hoặc thử lại.
         </p>
         <button
           type="button"
-          onClick={() => reset()}
+          onClick={() => retry()}
           style={{
             cursor: "pointer",
             borderRadius: "0.375rem",
@@ -59,7 +59,7 @@ export default function GlobalError({
             border: "none",
           }}
         >
-          Try again
+          Thử lại
         </button>
       </body>
     </html>

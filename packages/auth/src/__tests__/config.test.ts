@@ -16,38 +16,6 @@ describe("parseAuthConfig", () => {
     }
   })
 
-  it("fails in production if KEYCLOAK_CLIENT_SECRET is omitted", () => {
-    expect(() =>
-      parseAuthConfig({
-        NODE_ENV: "production",
-        AUTH_PROVIDER: "keycloak",
-      })
-    ).toThrow()
-  })
-
-  it("fails in production if JWT_SECRET_KEY is omitted for fastapi-oauth", () => {
-    expect(() =>
-      parseAuthConfig({
-        NODE_ENV: "production",
-        AUTH_PROVIDER: "fastapi-oauth",
-      })
-    ).toThrow()
-  })
-
-  it("succeeds in production when required secrets are supplied", () => {
-    const config = parseAuthConfig({
-      NODE_ENV: "production",
-      AUTH_PROVIDER: "keycloak",
-      KEYCLOAK_CLIENT_SECRET: "my-production-secret-value-long-enough",
-    })
-    expect(config.AUTH_PROVIDER).toBe("keycloak")
-    if (config.AUTH_PROVIDER === "keycloak") {
-      expect(config.KEYCLOAK_CLIENT_SECRET).toBe(
-        "my-production-secret-value-long-enough"
-      )
-    }
-  })
-
   it("permits build phase without live secrets when NEXT_PHASE is phase-production-build", () => {
     const config = parseAuthConfig({
       NODE_ENV: "production",
@@ -66,10 +34,17 @@ describe("parseAuthConfig", () => {
     const config = parseAuthConfig({
       NODE_ENV: "production",
       SKIP_ENV_VALIDATION: "true",
-      AUTH_PROVIDER: "supabase",
+      AUTH_PROVIDER: "neon-auth",
     })
-    expect(config.AUTH_PROVIDER).toBe("supabase")
+    expect(config.AUTH_PROVIDER).toBe("neon-auth")
   })
+
+  it("rejects any provider other than neon-auth", () => {
+    expect(() =>
+      parseAuthConfig({ NODE_ENV: "test", AUTH_PROVIDER: "supabase" })
+    ).toThrow()
+  })
+
   describe("neon-auth", () => {
     it("parses with the Neon URL and a dev cookie secret placeholder", () => {
       const config = parseAuthConfig({

@@ -1,61 +1,61 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  hasPermission,
-  isStaff,
-  parseRole,
-  permissionsOf,
-} from "../permissions"
+import { can, parseRole, roleOf } from "../permissions"
+import type { Action, Role } from "../permissions"
+
+const ALLOWED: Record<Role, readonly Action[]> = {
+  guest: ["deadline:view"],
+  user: ["deadline:view", "deadline:complete"],
+  admin: [
+    "deadline:view",
+    "deadline:complete",
+    "deadline:create",
+    "deadline:delete",
+  ],
+}
+
+const ROLES: Role[] = ["guest", "user", "admin"]
+const ACTIONS: Action[] = [
+  "deadline:view",
+  "deadline:complete",
+  "deadline:create",
+  "deadline:delete",
+]
+
+const CELLS = ROLES.flatMap((role) =>
+  ACTIONS.map((action) => [role, action, ALLOWED[role].includes(action)] as const)
+)
+
+describe("can (role x action matrix)", () => {
+  it("covers all 12 cells", () => {
+    expect(CELLS).toHaveLength(12)
+  })
+
+  it.each(CELLS)("can(%s, %s) is %s", (role, action, expected) => {
+    expect(can(role, action)).toBe(expected)
+  })
+})
 
 describe("parseRole", () => {
-  it("accepts the three known roles", () => {
-    expect(parseRole("customer")).toBe("customer")
-    expect(parseRole("editor")).toBe("editor")
+  it("accepts admin", () => {
     expect(parseRole("admin")).toBe("admin")
   })
 
-  it("falls back to customer for missing, unknown or differently-cased values", () => {
-    for (const value of [
-      undefined,
-      null,
-      "",
-      "Admin",
-      "member",
-      "owner",
-      1,
-      {},
-    ]) {
-      expect(parseRole(value)).toBe("customer")
+  it.each(["user", "customer", "editor", undefined, null, "ADMIN", 42])(
+    "falls back to user for %j (never admin)",
+    (value) => {
+      expect(parseRole(value)).toBe("user")
     }
-  })
+  )
 })
 
-describe("isStaff", () => {
-  it("is false for customers and true for editors and admins", () => {
-    expect(isStaff("customer")).toBe(false)
-    expect(isStaff("editor")).toBe(true)
-    expect(isStaff("admin")).toBe(true)
-  })
-})
-
-describe("hasPermission", () => {
-  it("gives customers only their account", () => {
-    expect(hasPermission("customer", "account:view")).toBe(true)
-    expect(hasPermission("customer", "admin:access")).toBe(false)
+describe("roleOf", () => {
+  it("is guest without a session", () => {
+    expect(roleOf(null)).toBe("guest")
   })
 
-  it("keeps settings and staff management for admins", () => {
-    expect(hasPermission("editor", "content:manage")).toBe(true)
-    expect(hasPermission("editor", "records:manage")).toBe(true)
-    expect(hasPermission("editor", "staff:manage")).toBe(false)
-    expect(hasPermission("editor", "settings:manage")).toBe(false)
-    expect(hasPermission("admin", "staff:manage")).toBe(true)
-    expect(hasPermission("admin", "settings:manage")).toBe(true)
-  })
-
-  it("gives admins everything editors have", () => {
-    for (const permission of permissionsOf("editor")) {
-      expect(hasPermission("admin", permission)).toBe(true)
-    }
+  it("uses the session role", () => {
+    expect(roleOf({ role: "admin" })).toBe("admin")
+    expect(roleOf({ role: "user" })).toBe("user")
   })
 })

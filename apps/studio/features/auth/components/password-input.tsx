@@ -10,12 +10,11 @@ import {
   InputGroupInput,
 } from "@workspace/ui/components/input-group"
 
-type PasswordInputProps = {
-  id: string
-  name: string
+type PasswordInputProps = Omit<
+  React.ComponentProps<typeof InputGroupInput>,
+  "type"
+> & {
   autoComplete: "current-password" | "new-password"
-  placeholder?: string
-  disabled?: boolean
 }
 
 export function PasswordInput({
@@ -24,10 +23,12 @@ export function PasswordInput({
   autoComplete,
   placeholder,
   disabled,
+  className,
+  ...props
 }: PasswordInputProps) {
   const [visible, setVisible] = useState(false)
   return (
-    <InputGroup>
+    <InputGroup className={className}>
       <InputGroupInput
         id={id}
         name={name}
@@ -38,11 +39,12 @@ export function PasswordInput({
         minLength={6}
         maxLength={128}
         disabled={disabled}
+        {...props}
       />
       <InputGroupAddon align="inline-end">
         <InputGroupButton
           size="icon-xs"
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
           onClick={() => setVisible((value) => !value)}
         >
           {visible ? <IconEyeOff /> : <IconEye />}

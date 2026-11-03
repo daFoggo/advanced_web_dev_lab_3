@@ -1,9 +1,7 @@
 import {
-  IconBuilding,
-  IconDatabase,
-  IconFolders,
+  IconCalendarCheck,
   IconLayoutDashboard,
-  IconSettings,
+  IconShieldCog,
   type Icon,
 } from "@tabler/icons-react"
 
@@ -12,10 +10,8 @@ import type { NavIconName } from "@/config/navigation"
 /** `Record` makes TypeScript fail here when a name is added to `NavIconName` without an icon. */
 const NAV_ICONS: Record<NavIconName, Icon> = {
   overview: IconLayoutDashboard,
-  organizations: IconBuilding,
-  projects: IconFolders,
-  database: IconDatabase,
-  settings: IconSettings,
+  deadlines: IconCalendarCheck,
+  admin: IconShieldCog,
 }
 
 export function NavIcon({ name }: { name: NavIconName }) {

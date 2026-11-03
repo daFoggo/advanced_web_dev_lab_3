@@ -1,6 +1,8 @@
 # Authentication
 
-How authentication works in the dashboard app (`apps/studio`; `apps/web` is a public landing page with no session) and why. The code lives in
+> **Class Deadline Hub:** only `neon-auth` remains (no Supabase/Keycloak/FastAPI, no demo login, no `/sign-up`). Authorization is `can(role, action)` from `@workspace/auth/permissions` (`Role = guest | user | admin`), enforced in the DAL by `requireCan(action)` in `apps/studio/lib/dal.ts`. The login page is `/login`. Sections about other providers are historical.
+
+How authentication works in the dashboard app (`apps/studio`) and why. The code lives in
 `packages/auth` (`@workspace/auth`) and `packages/db` (`@workspace/db`) so every app shares it.
 Applies to Next.js 16.4 with Cache Components enabled.
 
@@ -81,7 +83,7 @@ in the app that owns the login; they become a package only when a second app nee
 | `@workspace/auth/server` | `getAuthProvider(options)`: the active provider for one app (`server-only`) |
 | `@workspace/auth/proxy` | `updateSession(request, options)`, `redirectWithSession(url, session)` |
 | `@workspace/auth/auth-handler` | `createAuthHandler()` for `app/api/auth/[...path]` |
-| `@workspace/auth/permissions` | `Role`, `hasPermission`, `parseRole`, `isStaff` |
+| `@workspace/auth/permissions` | `Role`, `SessionRole`, `Action`, `can`, `parseRole`, `roleOf`, `ROLE_LABEL` |
 | `@workspace/auth/types`, `/schemas` | `Session`, `AuthProvider`, `AuthOptions`; `SignInSchema`, `SignUpSchema` |
 | `@workspace/db/{public,server,errors,format,types}` | Supabase clients (`createPublicClient` for `"use cache"`, `createDataClient(token)` for RLS as the user), `unwrap`, `DataError`, `formatVnd`, `slugify`, generated `Database` |
 

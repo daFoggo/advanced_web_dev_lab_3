@@ -7,8 +7,6 @@ import type {
   AuthProvider,
   Credentials,
   Session,
-  SignUpInput,
-  SignUpResult,
 } from "../types"
 import { getNeonAuth } from "./auth"
 
@@ -68,16 +66,6 @@ export function createNeonAuthProvider(): AuthProvider {
         password: credentials.password,
       })
       check(error)
-    },
-
-    async signUp(input: SignUpInput): Promise<SignUpResult> {
-      const { error } = await auth.signUp.email({
-        name: input.name,
-        email: input.email,
-        password: input.password,
-      })
-      check(error)
-      return "signed-in"
     },
 
     async signOut(): Promise<void> {
